@@ -142,7 +142,7 @@ export default function Page() {
           <section className="rounded-2xl glass p-4 mb-4">
             <div className="flex items-center gap-2 mb-3">
               <div className="size-8 rounded-xl bg-black text-white grid place-items-center font-semibold font-title">N</div>
-              <input value={qcTitle} onChange={(e)=>setQcTitle(e.target.value)} placeholder="Escreva um título rápido…" className="flex-1 border border-black/10 bg.white/70 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black" />
+              <input value={qcTitle} onChange={(e)=>setQcTitle(e.target.value)} placeholder="Escreva um título rápido…" className="flex-1 border border-black/10 bg-white/70 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black" />
               <select value={qcCat} onChange={(e)=>setQcCat(e.target.value)} className="rounded-lg border border-black/10 bg-white/70 px-2 py-2">
                 {categories.map(c => <option key={c}>{c}</option>)}
               </select>
@@ -228,7 +228,7 @@ export default function Page() {
               </div>
               <div>
                 <label className="text-xs font-medium text-neutral-700">Autor</label>
-                <input value={author} onChange={(e)=>setAuthor(e.target.value)} placeholder="Seu nome" className="mt-1 w-full rounded-xl border border-black/10 bg.white/70 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black" />
+                <input value={author} onChange={(e)=>setAuthor(e.target.value)} placeholder="Seu nome" className="mt-1 w-full rounded-xl border border-black/10 bg-white/70 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black" />
               </div>
             </div>
             <div>
@@ -354,7 +354,7 @@ function Row({ a }: any) {
 function Thumb({ a }: any) {
   if (a.kind === 'image') return <img src={a.url} alt={a.name} className="h-20 w-28 object-cover rounded-lg border border-black/10 bg-white/70" />;
   if (a.kind === 'video') return <video src={a.url} className="h-20 w-28 object-cover rounded-lg border border-black/10 bg-black" />;
-  if (a.kind === 'pdf') return <div className="h-20 w-28 grid place-items-center rounded-lg border border-black/10 bg.white/70"><FileText className="size-6"/></div>;
+  if (a.kind === 'pdf') return <div className="h-20 w-28 grid place-items-center rounded-lg border border-black/10 bg-white/70"><FileText className="size-6"/></div>;
   if (a.kind === 'sheet') return <div className="h-20 w-28 grid place-items-center rounded-lg border border-black/10 bg-white/70"><FileSpreadsheet className="size-6"/></div>;
   if (a.kind === 'doc') return <div className="h-20 w-28 grid place-items-center rounded-lg border border-black/10 bg-white/70"><FileText className="size-6"/></div>;
   return <div className="h-20 w-28 grid place-items-center rounded-lg border border-black/10 bg-white/70"><FileType2 className="size-6"/></div>;
@@ -371,7 +371,7 @@ function Icon({ kind, className }: any) {
 
 function Avatar({ name }: any) {
   const initials = useMemo(()=>{ if(!name) return '?'; const parts=String(name).trim().split(/\s+/).slice(0,2); return parts.map(p=>p[0]?.toUpperCase()).join('')||'?'; },[name]);
-  return <div className="size-9 rounded-xl bg-black text.white grid place-items-center font-semibold font-title shrink-0">{initials}</div>;
+  return <div className="size-9 rounded-xl bg-black text-white grid place-items-center font-semibold font-title shrink-0">{initials}</div>;
 }
 
 function Empty({ onNew }: any) {
@@ -398,4 +398,3 @@ function Modal({ children, onClose }: any) {
       </div>
     </div>
   );
-}
