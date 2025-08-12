@@ -1,3 +1,7 @@
+import Link from "next/link";
+// ...
+const [viewing, setViewing] = useState<Note | null>(null);
+
 'use client';
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -43,6 +47,7 @@ type Note = {
 };
 
 // ===================== Page =====================
+const [viewing, setViewing] = useState<Note | null>(null);
 export default function Page() {
   const [notes, setNotes] = useState<Note[]>(() => {
     try { const raw = localStorage.getItem(LS_KEY); return raw ? JSON.parse(raw) : []; } catch { return []; }
@@ -59,6 +64,7 @@ export default function Page() {
     return m;
   }, [notes]);
 
+  const [viewing, setViewing] = useState<Note | null>(null);
   const [q, setQ] = useState('');
   const [cat, setCat] = useState('Todos');
   const [sort, setSort] = useState<'new' | 'old'>('new');
@@ -314,15 +320,14 @@ export default function Page() {
           </section>
 
           {/* Feed */}
-          {visible.length === 0 ? (
-            <Empty onNew={() => setOpen(true)} />
-          ) : (
-            <div className={view === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4' : 'space-y-3'}>
-              {visible.map(n => (
-                <Card key={n.id} n={n} prettyDate={prettyDate} onDelete={() => delNote(n.id)} />
-              ))}
-            </div>
-          )}
+            {visible.map(n => (
+              <Card
+                key={n.id}
+                n={n}
+                prettyDate={prettyDate}
+                onDelete={() => delNote(n.id)}
+                onOpen={() => setViewing(n)}
+            ))}
 
           <div ref={sentinelRef} className="h-8" />
         </main>
@@ -480,17 +485,209 @@ export default function Page() {
         </Modal>
       )}
 
+{/* Modal de visualização */}
+{viewing && (
+  <Modal onClose={() => setViewing(null)}>
+    <NoteDetails
+      note={viewing}
+      onClose={() => setViewing(null)}
+      prettyDate={prettyDate}
+    />
+  </Modal>
+)}  
       <footer className="py-10 text-center text-xs text-slate-500">Feito com ❤️ — dados salvos localmente no seu navegador</footer>
     </div>
   );
 }
 
 // ===================== Components =====================
-function Card({ n, onDelete, prettyDate }: { n: Note; onDelete: () => void; prettyDate: (iso: string) => string; }) {
+// ======== NoteDetails (modal de leitura) ========
+import Link from "next/link";
+import { X, Download } from "lucide-react";
+
+function NoteDetails({
+  note,
+  onClose,
+  prettyDate,
+}: {
+  note: Note;
+  onClose: () => void;
+  prettyDate: (iso: string) => string;
+}) {
+  const first = note.attachments?.[0];
+
+  // rótulo no chip (igual vibe do Synopsis)
+  const mediaLabel =
+    first?.kind === "image" ? "Imagem" :
+    first?.kind === "video" ? "Vídeo" :
+    first?.kind === "pdf"   ? "PDF" :
+    first ? "Arquivo" : null;
+
+  return (
+    <div className="w-full max-w-3xl">
+      {/* Cabeçalho */}
+      <div className="flex items-start justify-between p-4 md:p-6 border-b border-[var(--border)]">
+        <div className="min-w-0">
+          {mediaLabel && (
+            <span className="inline-flex items-center text-xs tag px-2 py-1 mb-2">{mediaLabel}</span>
+          )}
+          <h2 className="text-xl md:text-2xl font-bold font-title text-white leading-snug break-words">
+            {note.title || "(Sem título)"}
+          </h2>
+          {note.content && (
+            <p className="mt-2 text-slate-300 leading-relaxed">
+              {/* primeiro parágrafo como “descrição” resumida */}
+              {note.content.length > 260 ? note.content.slice(0, 260) + "…" : note.content}
+            </p>
+          )}
+          <div className="mt-3 flex items-center gap-3 text-slate-400 text-sm">
+            <Avatar name={note.author || "Anônimo"} />
+            <div className="leading-tight">
+              <div className="text-slate-200">{note.author || "Anônimo"}</div>
+              <div className="text-slate-400">{prettyDate(note.createdAt)}</div>
+            </div>
+            <span className="mx-1">•</span>
+            <span className="inline-flex items-center gap-1 tag px-2 py-1">
+              {note.category}
+            </span>
+          </div>
+        </div>
+
+        <button
+          onClick={onClose}
+          className="text-slate-400 hover:text-white ml-4 shrink-0"
+          aria-label="Fechar"
+        >
+          <X className="size-5" />
+        </button>
+      </div>
+
+      {/* Corpo */}
+      <div className="p-4 md:p-6 space-y-6">
+        {/* mídia destaque (se houver) */}
+        {first && (
+          <div className="rounded-xl overflow-hidden border border-[var(--border)] bg-[var(--elev)]">
+            {first.kind === "image" ? (
+              <img src={first.url} alt={first.name} className="w-full max-h-80 object-cover" />
+            ) : first.kind === "video" ? (
+              <video src={first.url} controls className="w-full bg-black" />
+            ) : (
+              <div className="h-40 grid place-items-center">
+                <Icon kind={first.kind} className="size-8 text-slate-300" />
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* conteúdo completo */}
+        {note.content && (
+          <div className="text-slate-200 whitespace-pre-wrap leading-relaxed">
+            {note.content}
+          </div>
+        )}
+
+        {/* anexos */}
+        {note.attachments?.length > 0 && (
+          <section>
+            <h3 className="font-semibold text-white mb-2">Anexos</h3>
+            <div className="grid gap-2">
+              {note.attachments.map((a) => (
+                <div
+                  key={a.id}
+                  className="flex items-center gap-3 p-2 rounded-xl bg-[var(--elev)] border border-[var(--border)]"
+                >
+                  <Icon kind={a.kind} className="size-5" />
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm text-slate-100" title={a.name}>
+                      {a.name}
+                    </div>
+                    {typeof a.size === "number" && (
+                      <div className="text-xs text-slate-500">{fmtBytes(a.size)}</div>
+                    )}
+                  </div>
+                  {/* ações rápidas */}
+                  {a.kind === "image" ? (
+                    <a
+                      href={a.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-slate-200 hover:text-white text-sm"
+                    >
+                      Abrir
+                    </a>
+                  ) : a.kind === "video" ? (
+                    <a
+                      href={a.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-slate-200 hover:text-white text-sm"
+                    >
+                      Reproduzir
+                    </a>
+                  ) : a.kind === "pdf" ? (
+                    <a
+                      href={a.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-slate-200 hover:text-white text-sm"
+                    >
+                      Visualizar
+                    </a>
+                  ) : (
+                    <a
+                      href={a.url}
+                      download={a.name}
+                      className="text-slate-200 hover:text-white"
+                      title="Baixar"
+                    >
+                      <Download className="size-4" />
+                    </a>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Ações (igual Synopsis: acessar + página completa) */}
+        <div className="flex flex-col sm:flex-row gap-2 pt-2">
+          {first && (
+            <a
+              href={first.url}
+              target={first.kind === "image" || first.kind === "video" ? "_blank" : undefined}
+              rel="noreferrer"
+              className="button text-center"
+            >
+              <span className="inline-flex items-center gap-2">Acessar conteúdo</span>
+            </a>
+          )}
+          <Link href={`/note/${note.id}`} className="button text-center">
+            <span className="inline-flex items-center gap-2">Página completa</span>
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Card({
+  n,
+  onDelete,
+  prettyDate,
+  onOpen,
+}: {
+  n: Note;
+  onDelete: () => void;
+  prettyDate: (iso: string) => string;
+  onOpen: () => void;
+}) {
   const first = n.attachments?.[0];
   return (
-    <article className="card note-card">
-      {/* Top media banner */}
+    <article
+      onClick={onOpen}
+      className="card note-card cursor-pointer transition-transform hover:scale-[1.01]"
+      title="Ver nota completa"
+    >
       {first && (
         <div className="relative">
           {first.kind === 'image' ? (
@@ -509,6 +706,132 @@ function Card({ n, onDelete, prettyDate }: { n: Note; onDelete: () => void; pret
           )}
         </div>
       )}
+function NoteDetails({
+  note,
+  onClose,
+  prettyDate,
+}: {
+  note: Note;
+  onClose: () => void;
+  prettyDate: (iso: string) => string;
+}) {
+  const first = note.attachments?.[0];
+  return (
+    <div className="p-4 md:p-6 max-h-[80vh] overflow-auto space-y-4">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <div className="inline-flex items-center gap-2 tag px-2 py-1 mb-2">
+            <span className="text-xs">Categoria:</span>
+            <strong className="text-xs">{note.category}</strong>
+          </div>
+          <h2 className="text-xl md:text-2xl font-bold font-title">{note.title}</h2>
+          <div className="mt-1 text-sm text-slate-400">
+            <span>{note.author || 'Anônimo'}</span>
+            <span className="mx-2">•</span>
+            <span>{prettyDate(note.createdAt)}</span>
+          </div>
+        </div>
+        <button onClick={onClose} className="text-slate-400 hover:text-white">
+          <X className="size-5" />
+        </button>
+      </div>
+
+      {first ? (
+        first.kind === "image" ? (
+          <img src={first.url} alt={first.name} className="w-full max-h-72 object-cover rounded-xl" />
+        ) : first.kind === "video" ? (
+          <video src={first.url} controls className="w-full rounded-xl bg-black" />
+        ) : (
+          <div className="w-full h-40 grid place-items-center rounded-xl bg-[var(--elev)] border border-[var(--border)]">
+            <Icon kind={first.kind} className="size-8 text-slate-300" />
+          </div>
+        )
+      ) : null}
+
+      {note.content && (
+        <p className="text-slate-200 whitespace-pre-wrap leading-relaxed">{note.content}</p>
+      )}
+
+      {note.attachments?.length > 0 && (
+        <div>
+          <h4 className="font-semibold mb-2">Anexos</h4>
+          <div className="grid gap-2">
+            {note.attachments.map(a => (
+              <div key={a.id} className="flex items-center gap-3 p-2 rounded-xl bg-[var(--elev)] border border-[var(--border)]">
+                <Icon kind={a.kind} className="size-5" />
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-sm" title={a.name}>{a.name}</div>
+                  {typeof a.size === 'number' ? <div className="text-xs text-slate-500">{fmtBytes(a.size)}</div> : null}
+                </div>
+                {a.kind === 'image' ? (
+                  <a href={a.url} target="_blank" rel="noreferrer" className="text-slate-200 text-sm">Abrir</a>
+                ) : a.kind === 'video' ? (
+                  <a href={a.url} target="_blank" rel="noreferrer" className="text-slate-200 text-sm">Reproduzir</a>
+                ) : a.kind === 'pdf' ? (
+                  <a href={a.url} target="_blank" rel="noreferrer" className="text-slate-200 text-sm">Visualizar</a>
+                ) : (
+                  <a href={a.url} download={a.name} className="text-slate-200 text-sm">Baixar</a>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="flex flex-col md:flex-row gap-2 pt-2">
+        {first ? (
+          <a
+            href={first.url}
+            target={first.kind === 'image' || first.kind === 'video' ? '_blank' : undefined}
+            rel="noreferrer"
+            className="button text-center"
+          >
+            <span className="inline-flex items-center gap-2">Acessar conteúdo</span>
+          </a>
+        ) : null}
+        <Link href={`/note/${note.id}`} className="button text-center">
+          <span className="inline-flex items-center gap-2">Página completa</span>
+        </Link>
+      </div>
+    </div>
+  );
+}
+      
+      <div className="note-body">
+        <div className="flex items-start gap-3">
+          <Avatar name={n.author} />
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="font-semibold truncate font-title" title={n.title}>{n.title}</h3>
+              <span className="inline-flex items-center gap-1 tag px-2 py-1">
+                <Tag className="size-3" />{n.category}
+              </span>
+              <span className="text-xs text-slate-400">{prettyDate(n.createdAt)}</span>
+            </div>
+            {n.content && (
+              <p className="text-sm text-slate-200 mt-1 whitespace-pre-wrap line-clamp-3">{n.content}</p>
+            )}
+          </div>
+
+          {/* impedir de abrir o modal ao excluir */}
+          <button
+            onClick={(e) => { e.stopPropagation(); onDelete(); }}
+            className="text-slate-400 hover:text-rose-400"
+            title="Excluir nota"
+          >
+            <Trash2 className="size-5" />
+          </button>
+        </div>
+
+        {n.attachments?.length > 0 && (
+          <div className="mt-3 grid grid-cols-1 gap-2">
+            {n.attachments.map(a => <Row key={a.id} a={a} />)}
+          </div>
+        )}
+      </div>
+    </article>
+  );
+}
 
       <div className="note-body">
         <div className="flex items-start gap-3">
