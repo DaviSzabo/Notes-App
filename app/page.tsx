@@ -465,7 +465,6 @@ export default function Page() {
             <div className="flex items-center justify-end gap-2 pt-2">
               <button onClick={() => setOpen(false)} className="btn-ghost">Cancelar</button>
               <div className="flex items-center justify-end gap-2 pt-2">
-                <button onClick={() => setOpen(false)} className="btn-ghost">Cancelar</button>
                 <button onClick={() => createNote()} className="button">
                   <span className="inline-flex items-center gap-2">
                     <Plus className="size-4" />
