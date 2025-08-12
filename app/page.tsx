@@ -240,12 +240,6 @@ export default function Page() {
         Nova nota
       </span>
     </button>
-    <button onClick={() => setOpen(true)} className="btn2">
-      <span className="inline-flex items-center gap-2">
-        <Plus className="size-4" />
-        Nova
-      </span>
-    </button>
     </div>
 
     <div className="md:hidden ml-auto">
