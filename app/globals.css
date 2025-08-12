@@ -1,72 +1,89 @@
-/* globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
+/* Ubuntu (texto) */
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap');
+
+/* Madera (títulos/botões) — ajuste se usar .woff2 */
+@font-face {
+  font-family: 'Madera';
+  src: local('Madera Regular'), url('/fonts/Madera-Regular.ttf') format('truetype');
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Madera';
+  src: local('Madera Medium'), url('/fonts/Madera-Medium.ttf') format('truetype');
+  font-weight: 500; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Madera';
+  src: local('Madera Bold'), url('/fonts/Madera-Bold.ttf') format('truetype');
+  font-weight: 700; font-style: normal; font-display: swap;
+}
+
+/* ---------- Dark tokens ---------- */
 :root {
-  --background: #0d0d0d;
-  --foreground: #f5f5f5;
-  --primary: #4f46e5; /* Azul/violeta moderno */
-  --secondary: #27272a;
-  --border: #1f1f1f;
+  --bg: #0c0c0d;           /* fundo */
+  --surface: #121214;      /* cartões/barras */
+  --elev: #16161a;         /* elevação leve */
+  --ink: #f3f4f6;          /* texto principal */
+  --muted: #a1a1aa;        /* texto secundário */
+  --border: #232327;       /* borda sutil */
+  --pill: #1a1a1f;         /* chips */
+  --shadow: 0 10px 24px rgba(0,0,0,.35);
+  --primary: #6d6aff;      /* destaque para botões/links */
 }
 
-html, body {
-  padding: 0;
-  margin: 0;
-  background-color: var(--background);
-  color: var(--foreground);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-  height: 100%;
-}
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--ink); }
 
-* {
-  box-sizing: border-box;
-}
+.font-title { font-family: 'Madera', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif; }
+.font-body  { font-family: 'Ubuntu', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif; }
 
-a {
-  color: var(--primary);
-  text-decoration: none;
-}
+/* ---------- Component classes usadas no app ---------- */
 
-a:hover {
-  text-decoration: underline;
-}
+/* Barra/topo e superfícies */
+.bar     { background: var(--surface); border-bottom: 1px solid var(--border); }
+.surface { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); }
 
-input, textarea, button {
-  background-color: var(--secondary);
-  color: var(--foreground);
+/* “glass” no dark vira cartão escuro (mantemos a classe para compatibilidade) */
+.glass   { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); }
+
+/* Botões */
+.btn-dark {
+  background: #000; color: #fff; border-radius: 9999px; padding: 10px 16px; font-weight: 600;
+  border: 1px solid #000;
+}
+.btn-dark:hover { background: #0b0b0b; }
+.btn-ghost {
+  background: var(--elev); color: var(--ink); border: 1px solid var(--border);
+  border-radius: 9999px; padding: 10px 16px; font-weight: 600;
+}
+.btn-ghost:hover { background: #1c1c21; }
+
+/* Inputs/Selects */
+.input-clean, input[type="text"], input[type="search"], select, textarea {
+  background: var(--elev);
+  color: var(--ink);
   border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 8px 12px;
-  font-size: 14px;
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+.input-clean::placeholder,
+input::placeholder, textarea::placeholder { color: #8b8b92; }
+.input-clean:focus, input:focus, select:focus, textarea:focus {
+  outline: none; border-color: var(--primary);
 }
 
-input:focus, textarea:focus, button:focus {
-  outline: none;
-  border-color: var(--primary);
-}
-
-button {
-  cursor: pointer;
-  background-color: var(--primary);
-  color: #fff;
-  font-weight: 500;
-  border: none;
-}
-
-button:hover {
-  opacity: 0.9;
-}
-
-.container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 2rem;
-}
-
-.card {
-  background-color: var(--secondary);
-  padding: 1.5rem;
-  border-radius: 10px;
+/* Chips/etiquetas */
+.tag {
+  background: var(--pill);
+  color: var(--muted);
   border: 1px solid var(--border);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  border-radius: 9999px;
 }
+
+/* Links em geral */
+a { color: var(--primary); }
+a:hover { opacity: .95; }
