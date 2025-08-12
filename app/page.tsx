@@ -364,21 +364,21 @@ export default function Page() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className="text-xs text-slate-700 font-medium">Título</label>
-                <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Resumo da reunião, ideia, tarefa..." className="mt-1 w/full input-clean" />
+                <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Resumo da reunião, ideia, tarefa..." className="mt-1 w-full input-clean" />
               </div>
               <div>
                 <label className="text-xs text-slate-700 font-medium">Autor</label>
-                <input value={author} onChange={(e) => setAuthor(e.target.value)} placeholder="Seu nome" className="mt-1 w/full input-clean" />
+                <input value={author} onChange={(e) => setAuthor(e.target.value)} placeholder="Seu nome" className="mt-1 w-full input-clean" />
               </div>
             </div>
             <div>
               <label className="text-xs text-slate-700 font-medium">Conteúdo</label>
-              <textarea value={content} onChange={(e) => setContent(e.target.value)} rows={4} placeholder="Digite sua nota..." className="mt-1 w/full input-clean" />
+              <textarea value={content} onChange={(e) => setContent(e.target.value)} rows={4} placeholder="Digite sua nota..." className="mt-1 w-full input-clean" />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className="text-xs text-slate-700 font-medium">Categoria</label>
-                <select value={category} onChange={(e) => setCategory(e.target.value)} className="mt-1 w/full input-clean">
+                <select value={category} onChange={(e) => setCategory(e.target.value)} className="mt-1 w-full input-clean">
                   {categories.map(c => <option key={c}>{c}</option>)}
                 </select>
               </div>
