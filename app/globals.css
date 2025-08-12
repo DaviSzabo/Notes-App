@@ -321,3 +321,13 @@ a:hover { opacity: .95; }
 .note-card .note-body {
   padding: 16px;      /* padding interno (já que tirei o p-4 do body) */
 }
+
+/* garante respiro do search */
+.header-search input {
+  padding-left: 3.25rem; /* igual ao inline acima */
+}
+
+/* select com ícone interno */
+.header-select {
+  padding-right: 2.5rem;
+}
