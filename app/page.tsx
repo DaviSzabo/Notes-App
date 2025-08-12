@@ -700,11 +700,18 @@ function Modal({ children, onClose }: { children: React.ReactNode; onClose: () =
   return (
     <div className="fixed inset-0 z-50 grid place-items-center p-4">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative w-full max-w-2xl glass shadow-xl">
-        <div className="flex items-center justify-between p-4 border-b border-[var(--border)]">
+      <div className="relative w-full max-w-2xl glass shadow-xl rounded-lg overflow-hidden">
+        {/* Header do modal */}
+        <div className="flex items-center justify-between p-4 bg-white text-black rounded-t-lg border-b border-[var(--border)]">
           <h3 className="font-semibold font-title">Nova nota</h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-white"><X className="size-5" /></button>
+          <button 
+            onClick={onClose} 
+            className="text-black hover:text-neutral-600 transition-colors"
+          >
+            <X className="size-5" />
+          </button>
         </div>
+
         {children}
       </div>
     </div>
