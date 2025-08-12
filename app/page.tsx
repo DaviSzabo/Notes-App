@@ -234,9 +234,18 @@ export default function Page() {
         </button>
       </div>
 
-      <button onClick={() => setOpen(true)} className="inline-flex items-center gap-2 btn-dark font-title rounded-full">
-        <Plus className="size-4" />Nova nota
-      </button>
+    <button onClick={() => setOpen(true)} className="btn2">
+      <span className="inline-flex items-center gap-2">
+        <Plus className="size-4" />
+        Nova nota
+      </span>
+    </button>
+    <button onClick={() => setOpen(true)} className="btn2">
+      <span className="inline-flex items-center gap-2">
+        <Plus className="size-4" />
+        Nova
+      </span>
+    </button>
     </div>
 
     <div className="md:hidden ml-auto">
@@ -291,10 +300,18 @@ export default function Page() {
                 Anexar
               </label>
               <button
-                onClick={() => createNote({ title: qcTitle.trim() || '(Sem título)', content: '', author: 'Anônimo', category: qcCat, attachments: qcFiles })}
-                className="btn-dark font-title"
+                onClick={() =>
+                  createNote({
+                    title: qcTitle.trim() || '(Sem título)',
+                    content: '',
+                    author: 'Anônimo',
+                    category: qcCat,
+                    attachments: qcFiles,
+                  })
+                }
+                className="btn2"
               >
-                Postar
+                <span>Postar</span>
               </button>
             </div>
             {qcFiles.length > 0 && (
@@ -453,7 +470,15 @@ export default function Page() {
             </div>
             <div className="flex items-center justify-end gap-2 pt-2">
               <button onClick={() => setOpen(false)} className="btn-ghost">Cancelar</button>
-              <button onClick={() => createNote()} className="inline-flex items-center gap-2 btn-dark font-title"><Plus className="size-4" />Salvar nota</button>
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button onClick={() => setOpen(false)} className="btn-ghost">Cancelar</button>
+                <button onClick={() => createNote()} className="btn2">
+                  <span className="inline-flex items-center gap-2">
+                    <Plus className="size-4" />
+                    Salvar nota
+                  </span>
+                </button>
+              </div>
             </div>
           </div>
         </Modal>
