@@ -489,23 +489,56 @@ export default function Page() {
 function Card({ n, onDelete, prettyDate }: { n: Note; onDelete: () => void; prettyDate: (iso: string) => string; }) {
   const first = n.attachments?.[0];
   return (
-    <article className="glass overflow-hidden">
+    <article className="card note-card">
+      {/* Top media banner */}
       {first && (
         <div className="relative">
           {first.kind === 'image' ? (
-            <img src={first.url} alt={first.name} className="h-48 w-full object-cover" />
+            <img src={first.url} alt={first.name} className="h-40 w-full object-cover" />
           ) : first.kind === 'video' ? (
-            <video src={first.url} className="h-48 w-full object-cover bg-black" />
+            <video src={first.url} className="h-40 w-full object-cover bg-black" />
           ) : (
-            <div className="h-48 w-full grid place-items-center bg-[var(--pill)]">
+            <div className="h-40 w-full grid place-items-center bg-black/20">
               <Icon kind={first.kind} className="size-8 text-slate-300" />
             </div>
           )}
           {n.attachments?.length > 1 && (
-            <div className="absolute bottom-2 right-2 text-xs bg-black/60 text-white rounded-full px-2 py-1">+ {n.attachments.length - 1}</div>
+            <div className="absolute bottom-2 right-2 text-xs bg-black/60 text-white rounded-full px-2 py-1">
+              + {n.attachments.length - 1}
+            </div>
           )}
         </div>
       )}
+
+      <div className="note-body">
+        <div className="flex items-start gap-3">
+          <Avatar name={n.author} />
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="font-semibold truncate font-title" title={n.title}>{n.title}</h3>
+              <span className="inline-flex items-center gap-1 tag px-2 py-1">
+                <Tag className="size-3" />{n.category}
+              </span>
+              <span className="text-xs text-slate-400">{prettyDate(n.createdAt)}</span>
+            </div>
+            {n.content && (
+              <p className="text-sm text-slate-200 mt-1 whitespace-pre-wrap line-clamp-3">{n.content}</p>
+            )}
+          </div>
+          <button onClick={onDelete} className="text-slate-400 hover:text-rose-400" title="Excluir nota">
+            <Trash2 className="size-5" />
+          </button>
+        </div>
+
+        {n.attachments?.length > 0 && (
+          <div className="mt-3 grid grid-cols-1 gap-2">
+            {n.attachments.map(a => <Row key={a.id} a={a} />)}
+          </div>
+        )}
+      </div>
+    </article>
+  );
+}
 
       <div className="p-4">
         <div className="flex items-start gap-3">
