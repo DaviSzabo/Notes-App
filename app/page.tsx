@@ -183,7 +183,7 @@ export default function Page() {
       {/* Top bar (branca para contraste) */}
       <header className="sticky top-0 z-40 bg-white border-b border-neutral-200">
   <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
-    <div className="flex items-center gap-2">
+    <div className="">
       <div className="size-8 rounded-full bg-black text-white grid place-items-center font-semibold font-title">N</div>
       <div className="leading-tight">
         <div className="font-semibold font-title text-slate-900">Notes Feed</div>
@@ -334,9 +334,30 @@ export default function Page() {
                     <option value="old">Mais antigas</option>
                   </select>
                 </div>
-                <div className="flex items-center gap-2">
-                  <input id="onlyAtt" type="checkbox" checked={onlyWithAtt} onChange={(e) => { setOnlyWithAtt(e.target.checked); setLimit(12); }} className="size-4" />
-                  <label htmlFor="onlyAtt" className="text-sm">Apenas com anexos</label>
+                {/* Checkbox estilizado (Uiverse) */}
+                <div className="checkbox-wrapper-4 mt-1">
+                  <input
+                    className="inp-cbx"
+                    id="onlyAtt"
+                    type="checkbox"
+                    checked={onlyWithAtt}
+                    onChange={(e) => { setOnlyWithAtt(e.target.checked); setLimit(12); }}
+                  />
+                  <label className="cbx" htmlFor="onlyAtt">
+                    <span>
+                      <svg width="12" height="10">
+                        {/* React moderno usa href em vez de xlinkHref */}
+                        <use href="#check-4"></use>
+                      </svg>
+                    </span>
+                    <span>Apenas com anexos</span>
+                  </label>
+                  {/* Símbolo inline necessário para a animação */}
+                  <svg className="inline-svg">
+                    <symbol id="check-4" viewBox="0 0 12 10">
+                      <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
+                    </symbol>
+                  </svg>
                 </div>
                 <div>
                   <label className="text-xs text-slate-400">Exibição</label>
