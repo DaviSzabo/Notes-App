@@ -283,7 +283,7 @@ export default function Page() {
 
         {/* Center */}
         <main>
-          {/* Quick composer → vira “lançador” do modal */}
+          {/* Quick composer — decorativo, abre o modal */}
           <section
             className="glass p-4 mb-4 group relative cursor-pointer rounded-2xl"
             onClick={() => setOpen(true)}
@@ -300,35 +300,62 @@ export default function Page() {
             {/* Aura/hover sutil */}
             <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-transparent group-hover:ring-white/10 transition" />
           
-            {/* Conteúdo visual permanece igual (não precisa mexer) */}
             <div className="flex items-center gap-2 mb-3">
               <div className="size-7 rounded-full bg-black text-white grid place-items-center font-semibold font-title">N</div>
+          
+              {/* Título — visual apenas */}
               <input
                 value={qcTitle}
-                onChange={(e) => setQcTitle(e.target.value)}
                 placeholder="Escreva um título rápido…"
                 className="flex-1 input-clean py-3"
+                readOnly
+                onFocus={(e) => e.currentTarget.blur()}
+                tabIndex={-1}
+                aria-hidden="true"
+                style={{ pointerEvents: 'none' }}
               />
-              <select value={qcCat} onChange={(e) => setQcCat(e.target.value)} className="input-clean py-3">
+          
+              {/* Categoria — visual apenas */}
+              <select
+                value={qcCat}
+                className="input-clean py-3"
+                tabIndex={-1}
+                aria-hidden="true"
+                style={{ pointerEvents: 'none' }}
+              >
                 {categories.map(c => <option key={c}>{c}</option>)}
               </select>
-              <label className="inline-flex items-center gap-2 text-sm input-clean py-3 cursor-pointer">
+          
+              {/* Anexar — visual apenas */}
+              <label
+                className="inline-flex items-center gap-2 text-sm input-clean py-3 cursor-default"
+                tabIndex={-1}
+                aria-hidden="true"
+                style={{ pointerEvents: 'none' }}
+              >
                 <Paperclip className="size-4" />
-                <input
-                  type="file"
-                  multiple
-                  className="hidden"
-                  onChange={(e) => addFiles((e.target as HTMLInputElement).files!, setQcFiles)}
-                />
                 Anexar
               </label>
-              <button className="button">
+          
+              {/* Botão — visual apenas */}
+              <button
+                type="button"
+                className="button"
+                tabIndex={-1}
+                aria-hidden="true"
+                style={{ pointerEvents: 'none' }}
+              >
                 <span>Postar</span>
               </button>
             </div>
           
+            {/* Thumbs — também decorativas quando existirem */}
             {qcFiles.length > 0 && (
-              <div className="flex gap-2 overflow-x-auto">
+              <div
+                className="flex gap-2 overflow-x-auto"
+                aria-hidden="true"
+                style={{ pointerEvents: 'none' }}
+              >
                 {qcFiles.map(f => <Thumb key={f.id} a={f} />)}
               </div>
             )}
