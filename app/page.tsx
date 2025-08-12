@@ -1,10 +1,7 @@
-import Link from "next/link";
-// ...
-const [viewing, setViewing] = useState<Note | null>(null);
-
 'use client';
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
 import {
   Plus, Paperclip, Search, Filter, Tag, Trash2, Download, X, Upload,
   Image as ImageIcon, FileText, Film, FileSpreadsheet, FileType2,
@@ -47,7 +44,6 @@ type Note = {
 };
 
 // ===================== Page =====================
-const [viewing, setViewing] = useState<Note | null>(null);
 export default function Page() {
   const [notes, setNotes] = useState<Note[]>(() => {
     try { const raw = localStorage.getItem(LS_KEY); return raw ? JSON.parse(raw) : []; } catch { return []; }
@@ -64,7 +60,6 @@ export default function Page() {
     return m;
   }, [notes]);
 
-  const [viewing, setViewing] = useState<Note | null>(null);
   const [q, setQ] = useState('');
   const [cat, setCat] = useState('Todos');
   const [sort, setSort] = useState<'new' | 'old'>('new');
@@ -77,7 +72,7 @@ export default function Page() {
   const [qcCat, setQcCat] = useState('Geral');
   const [qcFiles, setQcFiles] = useState<Att[]>([]);
 
-  // modal
+  // modal criação
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -87,7 +82,10 @@ export default function Page() {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const dropRef = useRef<HTMLDivElement | null>(null);
 
-  // DnD
+  // modal visualização
+  const [viewing, setViewing] = useState<Note | null>(null);
+
+  // DnD (modal criação)
   useEffect(() => {
     const el = dropRef.current; if (!el) return;
     const stop = (e: any) => { e.preventDefault(); e.stopPropagation(); };
@@ -188,71 +186,72 @@ export default function Page() {
     <div className="min-h-screen font-body">
       {/* Top bar (branca para contraste) */}
       <header className="sticky top-0 z-40 bg-white border-b border-neutral-200">
-  <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
-    <div className="">
-      <div className="size-8 rounded-full bg-black text-white grid place-items-center font-semibold font-title">N</div>
-      <div className="leading-tight">
-        <div className="font-semibold font-title text-slate-900">Notes Feed</div>
-        <div className="text-xs text-slate-500">Estilo Reflect</div>
-      </div>
-    </div>
+        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <div className="size-8 rounded-full bg-black text-white grid place-items-center font-semibold font-title">N</div>
+            <div className="leading-tight">
+              <div className="font-semibold font-title text-slate-900">Notes Feed</div>
+              <div className="text-xs text-slate-500">Estilo Reflect</div>
+            </div>
+          </div>
 
-    <div className="hidden md:flex items-center gap-2 ml-6 flex-1">
-      {/* Search com mais respiro */}
-    <div className="relative flex-1">
-      <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-5 text-slate-400" />
-      <input
-        value={q}
-        onChange={(e) => { setQ(e.target.value); setLimit(12); }}
-        placeholder="Buscar notas, autores e categorias"
-        className="w-full pl-12 pr-4 py-3 input-clean rounded-full"
-      />
-    </div>
+          <div className="hidden md:flex items-center gap-2 ml-6 flex-1">
+            <div className="relative flex-1">
+              <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-5 text-slate-400" />
+              <input
+                value={q}
+                onChange={(e) => { setQ(e.target.value); setLimit(12); }}
+                placeholder="Buscar notas, autores e categorias"
+                className="w-full pl-12 pr-4 py-3 input-clean rounded-full"
+              />
+            </div>
 
-      {/* Select + ícone de filtro alinhados */}
-      <select
-        value={cat}
-        onChange={(e) => { setCat(e.target.value); setLimit(12); }}
-        className="select"
-        aria-label="Selecionar categoria"
-      >
-        <option>Todos</option>
-        {categories.map(c => <option key={c}>{c}</option>)}
-      </select>
+            <select
+              value={cat}
+              onChange={(e) => { setCat(e.target.value); setLimit(12); }}
+              className="select"
+              aria-label="Selecionar categoria"
+            >
+              <option>Todos</option>
+              {categories.map(c => <option key={c}>{c}</option>)}
+            </select>
 
-      {/* Toggles com contraste (mantém seu CSS atual) */}
-      <div className="flex items-center gap-1 border border-[var(--border)] rounded-full p-1 bg-[var(--elev)]">
-        <button
-          onClick={() => setView('grid')}
-          className={`px-2.5 py-1.5 rounded-full border toolbar-toggle ${view==='grid'?'active':''}`}
-          title="Grid"
-        >
-          <LayoutGrid className="size-4" />
-        </button>
-        <button
-          onClick={() => setView('list')}
-          className={`px-2.5 py-1.5 rounded-full border toolbar-toggle ${view==='list'?'active':''}`}
-          title="Lista"
-        >
-          <List className="size-4" />
-        </button>
-      </div>
+            <div className="relative -ml-6 pr-1">
+              <Filter className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
+            </div>
 
-    <button onClick={() => setOpen(true)} className="button">
-      <span className="inline-flex items-center gap-2">
-        <Plus className="size-4" />
-        Nova nota
-      </span>
-    </button>
-    </div>
+            <div className="flex items-center gap-1 border border-[var(--border)] rounded-full p-1 bg-[var(--elev)]">
+              <button
+                onClick={() => setView('grid')}
+                className={`px-2.5 py-1.5 rounded-full border toolbar-toggle ${view==='grid'?'active':''}`}
+                title="Grid"
+              >
+                <LayoutGrid className="size-4" />
+              </button>
+              <button
+                onClick={() => setView('list')}
+                className={`px-2.5 py-1.5 rounded-full border toolbar-toggle ${view==='list'?'active':''}`}
+                title="Lista"
+              >
+                <List className="size-4" />
+              </button>
+            </div>
 
-    <div className="md:hidden ml-auto">
-      <button onClick={() => setOpen(true)} className="inline-flex items-center gap-2 btn-dark font-title rounded-full">
-        <Plus className="size-4" />Nova
-      </button>
-    </div>
-  </div>
-</header>
+            <button onClick={() => setOpen(true)} className="button">
+              <span className="inline-flex items-center gap-2">
+                <Plus className="size-4" />
+                Nova nota
+              </span>
+            </button>
+          </div>
+
+          <div className="md:hidden ml-auto">
+            <button onClick={() => setOpen(true)} className="inline-flex items-center gap-2 btn-dark font-title rounded-full">
+              <Plus className="size-4" />Nova
+            </button>
+          </div>
+        </div>
+      </header>
 
       <div className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-[220px_1fr_260px] gap-6">
         {/* Left */}
@@ -320,14 +319,21 @@ export default function Page() {
           </section>
 
           {/* Feed */}
-            {visible.map(n => (
-              <Card
-                key={n.id}
-                n={n}
-                prettyDate={prettyDate}
-                onDelete={() => delNote(n.id)}
-                onOpen={() => setViewing(n)}
-            ))}
+          {visible.length === 0 ? (
+            <Empty onNew={() => setOpen(true)} />
+          ) : (
+            <div className={view === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4' : 'space-y-3'}>
+              {visible.map(n => (
+                <Card
+                  key={n.id}
+                  n={n}
+                  prettyDate={prettyDate}
+                  onDelete={() => delNote(n.id)}
+                  onOpen={() => setViewing(n)}
+                />
+              ))}
+            </div>
+          )}
 
           <div ref={sentinelRef} className="h-8" />
         </main>
@@ -360,13 +366,11 @@ export default function Page() {
                   <label className="cbx" htmlFor="onlyAtt">
                     <span>
                       <svg width="12" height="10">
-                        {/* React moderno usa href em vez de xlinkHref */}
                         <use href="#check-4"></use>
                       </svg>
                     </span>
                     <span>Apenas com anexos</span>
                   </label>
-                  {/* Símbolo inline necessário para a animação */}
                   <svg className="inline-svg">
                     <symbol id="check-4" viewBox="0 0 12 10">
                       <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
@@ -412,7 +416,7 @@ export default function Page() {
         </aside>
       </div>
 
-      {/* Modal */}
+      {/* Modal de criação */}
       {open && (
         <Modal onClose={() => setOpen(false)}>
           <div className="p-4 space-y-3">
@@ -472,39 +476,36 @@ export default function Page() {
             </div>
             <div className="flex items-center justify-end gap-2 pt-2">
               <button onClick={() => setOpen(false)} className="btn-ghost">Cancelar</button>
-              <div className="flex items-center justify-end gap-2 pt-2">
-                <button onClick={() => createNote()} className="button">
-                  <span className="inline-flex items-center gap-2">
-                    <Plus className="size-4" />
-                    Salvar nota
-                  </span>
-                </button>
-              </div>
+              <button onClick={() => createNote()} className="button">
+                <span className="inline-flex items-center gap-2">
+                  <Plus className="size-4" />
+                  Salvar nota
+                </span>
+              </button>
             </div>
           </div>
         </Modal>
       )}
 
-{/* Modal de visualização */}
-{viewing && (
-  <Modal onClose={() => setViewing(null)}>
-    <NoteDetails
-      note={viewing}
-      onClose={() => setViewing(null)}
-      prettyDate={prettyDate}
-    />
-  </Modal>
-)}  
+      {/* Modal de visualização */}
+      {viewing && (
+        <Modal onClose={() => setViewing(null)}>
+          <NoteDetails
+            note={viewing}
+            onClose={() => setViewing(null)}
+            prettyDate={prettyDate}
+          />
+        </Modal>
+      )}
+
       <footer className="py-10 text-center text-xs text-slate-500">Feito com ❤️ — dados salvos localmente no seu navegador</footer>
     </div>
   );
 }
 
 // ===================== Components =====================
-// ======== NoteDetails (modal de leitura) ========
-import Link from "next/link";
-import { X, Download } from "lucide-react";
 
+// ======== NoteDetails (modal de leitura) ========
 function NoteDetails({
   note,
   onClose,
@@ -516,12 +517,11 @@ function NoteDetails({
 }) {
   const first = note.attachments?.[0];
 
-  // rótulo no chip (igual vibe do Synopsis)
   const mediaLabel =
-    first?.kind === "image" ? "Imagem" :
-    first?.kind === "video" ? "Vídeo" :
-    first?.kind === "pdf"   ? "PDF" :
-    first ? "Arquivo" : null;
+    first?.kind === 'image' ? 'Imagem' :
+    first?.kind === 'video' ? 'Vídeo' :
+    first?.kind === 'pdf'   ? 'PDF'   :
+    first ? 'Arquivo' : null;
 
   return (
     <div className="w-full max-w-3xl">
@@ -532,44 +532,36 @@ function NoteDetails({
             <span className="inline-flex items-center text-xs tag px-2 py-1 mb-2">{mediaLabel}</span>
           )}
           <h2 className="text-xl md:text-2xl font-bold font-title text-white leading-snug break-words">
-            {note.title || "(Sem título)"}
+            {note.title || '(Sem título)'}
           </h2>
           {note.content && (
             <p className="mt-2 text-slate-300 leading-relaxed">
-              {/* primeiro parágrafo como “descrição” resumida */}
-              {note.content.length > 260 ? note.content.slice(0, 260) + "…" : note.content}
+              {note.content.length > 260 ? note.content.slice(0, 260) + '…' : note.content}
             </p>
           )}
           <div className="mt-3 flex items-center gap-3 text-slate-400 text-sm">
-            <Avatar name={note.author || "Anônimo"} />
+            <Avatar name={note.author || 'Anônimo'} />
             <div className="leading-tight">
-              <div className="text-slate-200">{note.author || "Anônimo"}</div>
+              <div className="text-slate-200">{note.author || 'Anônimo'}</div>
               <div className="text-slate-400">{prettyDate(note.createdAt)}</div>
             </div>
             <span className="mx-1">•</span>
-            <span className="inline-flex items-center gap-1 tag px-2 py-1">
-              {note.category}
-            </span>
+            <span className="inline-flex items-center gap-1 tag px-2 py-1">{note.category}</span>
           </div>
         </div>
 
-        <button
-          onClick={onClose}
-          className="text-slate-400 hover:text-white ml-4 shrink-0"
-          aria-label="Fechar"
-        >
+        <button onClick={onClose} className="text-slate-400 hover:text-white ml-4 shrink-0" aria-label="Fechar">
           <X className="size-5" />
         </button>
       </div>
 
       {/* Corpo */}
       <div className="p-4 md:p-6 space-y-6">
-        {/* mídia destaque (se houver) */}
         {first && (
           <div className="rounded-xl overflow-hidden border border-[var(--border)] bg-[var(--elev)]">
-            {first.kind === "image" ? (
+            {first.kind === 'image' ? (
               <img src={first.url} alt={first.name} className="w-full max-h-80 object-cover" />
-            ) : first.kind === "video" ? (
+            ) : first.kind === 'video' ? (
               <video src={first.url} controls className="w-full bg-black" />
             ) : (
               <div className="h-40 grid place-items-center">
@@ -579,69 +571,31 @@ function NoteDetails({
           </div>
         )}
 
-        {/* conteúdo completo */}
         {note.content && (
-          <div className="text-slate-200 whitespace-pre-wrap leading-relaxed">
-            {note.content}
-          </div>
+          <div className="text-slate-200 whitespace-pre-wrap leading-relaxed">{note.content}</div>
         )}
 
-        {/* anexos */}
         {note.attachments?.length > 0 && (
           <section>
             <h3 className="font-semibold text-white mb-2">Anexos</h3>
             <div className="grid gap-2">
               {note.attachments.map((a) => (
-                <div
-                  key={a.id}
-                  className="flex items-center gap-3 p-2 rounded-xl bg-[var(--elev)] border border-[var(--border)]"
-                >
+                <div key={a.id} className="flex items-center gap-3 p-2 rounded-xl bg-[var(--elev)] border border-[var(--border)]">
                   <Icon kind={a.kind} className="size-5" />
                   <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm text-slate-100" title={a.name}>
-                      {a.name}
-                    </div>
-                    {typeof a.size === "number" && (
+                    <div className="truncate text-sm text-slate-100" title={a.name}>{a.name}</div>
+                    {typeof a.size === 'number' && (
                       <div className="text-xs text-slate-500">{fmtBytes(a.size)}</div>
                     )}
                   </div>
-                  {/* ações rápidas */}
-                  {a.kind === "image" ? (
-                    <a
-                      href={a.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-slate-200 hover:text-white text-sm"
-                    >
-                      Abrir
-                    </a>
-                  ) : a.kind === "video" ? (
-                    <a
-                      href={a.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-slate-200 hover:text-white text-sm"
-                    >
-                      Reproduzir
-                    </a>
-                  ) : a.kind === "pdf" ? (
-                    <a
-                      href={a.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-slate-200 hover:text-white text-sm"
-                    >
-                      Visualizar
-                    </a>
+                  {a.kind === 'image' ? (
+                    <a href={a.url} target="_blank" rel="noreferrer" className="text-slate-200 hover:text-white text-sm">Abrir</a>
+                  ) : a.kind === 'video' ? (
+                    <a href={a.url} target="_blank" rel="noreferrer" className="text-slate-200 hover:text-white text-sm">Reproduzir</a>
+                  ) : a.kind === 'pdf' ? (
+                    <a href={a.url} target="_blank" rel="noreferrer" className="text-slate-200 hover:text-white text-sm">Visualizar</a>
                   ) : (
-                    <a
-                      href={a.url}
-                      download={a.name}
-                      className="text-slate-200 hover:text-white"
-                      title="Baixar"
-                    >
-                      <Download className="size-4" />
-                    </a>
+                    <a href={a.url} download={a.name} className="text-slate-200 hover:text-white" title="Baixar"><Download className="size-4" /></a>
                   )}
                 </div>
               ))}
@@ -649,15 +603,9 @@ function NoteDetails({
           </section>
         )}
 
-        {/* Ações (igual Synopsis: acessar + página completa) */}
         <div className="flex flex-col sm:flex-row gap-2 pt-2">
           {first && (
-            <a
-              href={first.url}
-              target={first.kind === "image" || first.kind === "video" ? "_blank" : undefined}
-              rel="noreferrer"
-              className="button text-center"
-            >
+            <a href={first.url} target={first.kind === 'image' || first.kind === 'video' ? '_blank' : undefined} rel="noreferrer" className="button text-center">
               <span className="inline-flex items-center gap-2">Acessar conteúdo</span>
             </a>
           )}
@@ -683,11 +631,7 @@ function Card({
 }) {
   const first = n.attachments?.[0];
   return (
-    <article
-      onClick={onOpen}
-      className="card note-card cursor-pointer transition-transform hover:scale-[1.01]"
-      title="Ver nota completa"
-    >
+    <article onClick={onOpen} className="card note-card cursor-pointer transition-transform hover:scale-[1.01]" title="Ver nota completa">
       {first && (
         <div className="relative">
           {first.kind === 'image' ? (
@@ -700,168 +644,10 @@ function Card({
             </div>
           )}
           {n.attachments?.length > 1 && (
-            <div className="absolute bottom-2 right-2 text-xs bg-black/60 text-white rounded-full px-2 py-1">
-              + {n.attachments.length - 1}
-            </div>
+            <div className="absolute bottom-2 right-2 text-xs bg-black/60 text-white rounded-full px-2 py-1">+ {n.attachments.length - 1}</div>
           )}
         </div>
       )}
-function NoteDetails({
-  note,
-  onClose,
-  prettyDate,
-}: {
-  note: Note;
-  onClose: () => void;
-  prettyDate: (iso: string) => string;
-}) {
-  const first = note.attachments?.[0];
-  return (
-    <div className="p-4 md:p-6 max-h-[80vh] overflow-auto space-y-4">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <div className="inline-flex items-center gap-2 tag px-2 py-1 mb-2">
-            <span className="text-xs">Categoria:</span>
-            <strong className="text-xs">{note.category}</strong>
-          </div>
-          <h2 className="text-xl md:text-2xl font-bold font-title">{note.title}</h2>
-          <div className="mt-1 text-sm text-slate-400">
-            <span>{note.author || 'Anônimo'}</span>
-            <span className="mx-2">•</span>
-            <span>{prettyDate(note.createdAt)}</span>
-          </div>
-        </div>
-        <button onClick={onClose} className="text-slate-400 hover:text-white">
-          <X className="size-5" />
-        </button>
-      </div>
-
-      {first ? (
-        first.kind === "image" ? (
-          <img src={first.url} alt={first.name} className="w-full max-h-72 object-cover rounded-xl" />
-        ) : first.kind === "video" ? (
-          <video src={first.url} controls className="w-full rounded-xl bg-black" />
-        ) : (
-          <div className="w-full h-40 grid place-items-center rounded-xl bg-[var(--elev)] border border-[var(--border)]">
-            <Icon kind={first.kind} className="size-8 text-slate-300" />
-          </div>
-        )
-      ) : null}
-
-      {note.content && (
-        <p className="text-slate-200 whitespace-pre-wrap leading-relaxed">{note.content}</p>
-      )}
-
-      {note.attachments?.length > 0 && (
-        <div>
-          <h4 className="font-semibold mb-2">Anexos</h4>
-          <div className="grid gap-2">
-            {note.attachments.map(a => (
-              <div key={a.id} className="flex items-center gap-3 p-2 rounded-xl bg-[var(--elev)] border border-[var(--border)]">
-                <Icon kind={a.kind} className="size-5" />
-                <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm" title={a.name}>{a.name}</div>
-                  {typeof a.size === 'number' ? <div className="text-xs text-slate-500">{fmtBytes(a.size)}</div> : null}
-                </div>
-                {a.kind === 'image' ? (
-                  <a href={a.url} target="_blank" rel="noreferrer" className="text-slate-200 text-sm">Abrir</a>
-                ) : a.kind === 'video' ? (
-                  <a href={a.url} target="_blank" rel="noreferrer" className="text-slate-200 text-sm">Reproduzir</a>
-                ) : a.kind === 'pdf' ? (
-                  <a href={a.url} target="_blank" rel="noreferrer" className="text-slate-200 text-sm">Visualizar</a>
-                ) : (
-                  <a href={a.url} download={a.name} className="text-slate-200 text-sm">Baixar</a>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <div className="flex flex-col md:flex-row gap-2 pt-2">
-        {first ? (
-          <a
-            href={first.url}
-            target={first.kind === 'image' || first.kind === 'video' ? '_blank' : undefined}
-            rel="noreferrer"
-            className="button text-center"
-          >
-            <span className="inline-flex items-center gap-2">Acessar conteúdo</span>
-          </a>
-        ) : null}
-        <Link href={`/note/${note.id}`} className="button text-center">
-          <span className="inline-flex items-center gap-2">Página completa</span>
-        </Link>
-      </div>
-    </div>
-  );
-}
-      
-      <div className="note-body">
-        <div className="flex items-start gap-3">
-          <Avatar name={n.author} />
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="font-semibold truncate font-title" title={n.title}>{n.title}</h3>
-              <span className="inline-flex items-center gap-1 tag px-2 py-1">
-                <Tag className="size-3" />{n.category}
-              </span>
-              <span className="text-xs text-slate-400">{prettyDate(n.createdAt)}</span>
-            </div>
-            {n.content && (
-              <p className="text-sm text-slate-200 mt-1 whitespace-pre-wrap line-clamp-3">{n.content}</p>
-            )}
-          </div>
-
-          {/* impedir de abrir o modal ao excluir */}
-          <button
-            onClick={(e) => { e.stopPropagation(); onDelete(); }}
-            className="text-slate-400 hover:text-rose-400"
-            title="Excluir nota"
-          >
-            <Trash2 className="size-5" />
-          </button>
-        </div>
-
-        {n.attachments?.length > 0 && (
-          <div className="mt-3 grid grid-cols-1 gap-2">
-            {n.attachments.map(a => <Row key={a.id} a={a} />)}
-          </div>
-        )}
-      </div>
-    </article>
-  );
-}
-
-      <div className="note-body">
-        <div className="flex items-start gap-3">
-          <Avatar name={n.author} />
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="font-semibold truncate font-title" title={n.title}>{n.title}</h3>
-              <span className="inline-flex items-center gap-1 tag px-2 py-1">
-                <Tag className="size-3" />{n.category}
-              </span>
-              <span className="text-xs text-slate-400">{prettyDate(n.createdAt)}</span>
-            </div>
-            {n.content && (
-              <p className="text-sm text-slate-200 mt-1 whitespace-pre-wrap line-clamp-3">{n.content}</p>
-            )}
-          </div>
-          <button onClick={onDelete} className="text-slate-400 hover:text-rose-400" title="Excluir nota">
-            <Trash2 className="size-5" />
-          </button>
-        </div>
-
-        {n.attachments?.length > 0 && (
-          <div className="mt-3 grid grid-cols-1 gap-2">
-            {n.attachments.map(a => <Row key={a.id} a={a} />)}
-          </div>
-        )}
-      </div>
-    </article>
-  );
-}
 
       <div className="p-4">
         <div className="flex items-start gap-3">
@@ -874,7 +660,11 @@ function NoteDetails({
             </div>
             {n.content && <p className="text-sm text-slate-200 mt-1 whitespace-pre-wrap line-clamp-3">{n.content}</p>}
           </div>
-          <button onClick={onDelete} className="text-slate-400 hover:text-rose-400" title="Excluir nota">
+          <button
+            onClick={(e) => { e.stopPropagation(); onDelete(); }}
+            className="text-slate-400 hover:text-rose-400"
+            title="Excluir nota"
+          >
             <Trash2 className="size-5" />
           </button>
         </div>
