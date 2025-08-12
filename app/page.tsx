@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {
   Plus, Paperclip, Search, Filter, Tag, Trash2, Download, X, Upload,
   Image as ImageIcon, FileText, Film, FileSpreadsheet, FileType2,
-  Clock3, CheckCircle2, XCircle,
+  Clock3,
 } from 'lucide-react';
 
 // ===================== Utils =====================
@@ -159,27 +159,6 @@ export default function Page() {
   }, [notes, q, cat, sort, onlyWithAtt]);
 
   const visible = filtered.slice(0, limit);
-
-  // quick tests (renderização local)
-  const [tests, setTests] = useState<{ name: string; pass: boolean; details: any }[]>([]);
-  const runTests = () => {
-    const results: { name: string; pass: boolean; details: any }[] = [];
-    const bg = getComputedStyle(document.body).backgroundColor;
-    const passBg = /rgb\(\s*247\s*,\s*247\s*,\s*245\s*\)/.test(bg);
-    results.push({ name: 'Fundo claro estilo Reflect aplicado', pass: passBg, details: bg });
-
-    const demo = [
-      { id: '1', createdAt: '2025-01-01T00:00:00.000Z', attachments: [] },
-      { id: '2', createdAt: '2025-01-02T00:00:00.000Z', attachments: [{ id: 'a' }] },
-    ];
-    const only = demo.filter(n => n.attachments.length > 0);
-    results.push({ name: 'Filtro "Apenas com anexos" OK', pass: only.length === 1, details: only.length });
-
-    const sortedDemo = [...demo].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    results.push({ name: 'Ordenação "Mais recentes" OK', pass: sortedDemo[0].id === '2', details: sortedDemo.map(x => x.id).join(',') });
-
-    setTests(results);
-  };
 
   return (
     <div className="min-h-screen font-body">
@@ -353,12 +332,16 @@ export default function Page() {
               <div className="mt-3 space-y-3">
                 <div>
                   <label className="text-xs text-slate-400">Ordenar</label>
-                  <select value={sort} onChange={(e) => { setSort(e.target.value as 'new' | 'old'); setLimit(12); }} className="mt-1 w-full input-clean">
+                  <select
+                    value={sort}
+                    onChange={(e) => { setSort(e.target.value as 'new' | 'old'); setLimit(12); }}
+                    className="mt-1 w-full input-clean"
+                  >
                     <option value="new">Mais recentes</option>
                     <option value="old">Mais antigas</option>
                   </select>
                 </div>
-
+        
                 {/* Checkbox estilizado (Uiverse) */}
                 <div className="checkbox-wrapper-4 mt-1">
                   <input
@@ -384,24 +367,7 @@ export default function Page() {
                 </div>
               </div>
             </div>
-
-            <div className="glass p-4">
-              <h3 className="font-semibold text-sm font-title">Testes</h3>
-              <p className="text-sm text-slate-400 mt-1">Clique para executar checks rápidos de UI/lógica.</p>
-              <button onClick={runTests} className="mt-3 btn-dark font-title">Executar testes</button>
-              <ul className="mt-3 space-y-2">
-                {tests.map((t, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm">
-                    {t.pass ? <CheckCircle2 className="size-4 text-emerald-500" /> : <XCircle className="size-4 text-rose-500" />}
-                    <span>
-                      <span className="font-medium">{t.name}</span>
-                      <span className="block text-xs text-slate-500">{String(t.details)}</span>
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
+        
             <div className="glass p-4">
               <h3 className="font-semibold text-sm font-title">Dicas</h3>
               <ul className="mt-2 text-sm text-slate-400 list-disc list-inside space-y-1">
