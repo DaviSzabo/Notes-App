@@ -296,7 +296,7 @@ a:hover { opacity: .95; }
   cursor: not-allowed;
 }
 
-/* === Card do Feed de Notas === */
+/* Card para Notas */
 .card {
   width: 190px;
   height: 254px;
@@ -304,16 +304,20 @@ a:hover { opacity: .95; }
   background: #212121;
   box-shadow: 15px 15px 30px rgb(25, 25, 25),
               -15px -15px 30px rgb(60, 60, 60);
-  padding: 16px;
+}
+
+/* Ajuste p/ funcionar no grid do app */
+.note-card {
+  width: 100%;        /* ocupa toda a coluna do grid */
+  height: auto;       /* deixa a altura crescer com o conteúdo */
+  min-height: 254px;  /* preserva a vibe do card original */
   color: #fff;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-radius: 30px; /* garante arredondamento se Tailwind sobrescrever */
+  overflow: hidden;    /* mantém a mídia clipada nas bordas arredondadas */
 }
 
-.card:hover {
-  transform: translateY(-4px);
-  box-shadow: 15px 15px 35px rgb(20, 20, 20),
-              -15px -15px 35px rgb(65, 65, 65);
+.note-card .note-body {
+  padding: 16px;      /* padding interno (já que tirei o p-4 do body) */
 }
