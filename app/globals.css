@@ -5,26 +5,11 @@
 /* Ubuntu para corpo do texto */
 @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap');
 
-/* Madera (ajuste os nomes se seus arquivos tiverem outro nome) */
+/* Madera (ajuste os nomes se os seus arquivos tiverem outro nome) */
 @font-face {
   font-family: 'Madera';
   src: local('Madera Regular'), url('/fonts/Madera-Regular.ttf') format('truetype');
   font-weight: 400; font-style: normal; font-display: swap;
-}
-@font-face {
-  font-family: 'Madera';
-  src: local('Madera Italic'), url('/fonts/Madera-Italic.ttf') format('truetype');
-  font-weight: 400; font-style: italic; font-display: swap;
-}
-@font-face {
-  font-family: 'Madera';
-  src: local('Madera Light'), url('/fonts/Madera-Light.ttf') format('truetype');
-  font-weight: 300; font-style: normal; font-display: swap;
-}
-@font-face {
-  font-family: 'Madera';
-  src: local('Madera Light Italic'), url('/fonts/Madera-Light-Italic.ttf') format('truetype');
-  font-weight: 300; font-style: italic; font-display: swap;
 }
 @font-face {
   font-family: 'Madera';
@@ -33,38 +18,18 @@
 }
 @font-face {
   font-family: 'Madera';
-  src: local('Madera Medium Italic'), url('/fonts/Madera-Medium-Italic.ttf') format('truetype');
-  font-weight: 500; font-style: italic; font-display: swap;
-}
-@font-face {
-  font-family: 'Madera';
   src: local('Madera Bold'), url('/fonts/Madera-Bold.ttf') format('truetype');
   font-weight: 700; font-style: normal; font-display: swap;
-}
-@font-face {
-  font-family: 'Madera';
-  src: local('Madera Bold Italic'), url('/fonts/Madera-Bold-Italic.ttf') format('truetype');
-  font-weight: 700; font-style: italic; font-display: swap;
-}
-@font-face {
-  font-family: 'Madera';
-  src: local('Madera Extra Bold'), url('/fonts/Madera-Extra-Bold.ttf') format('truetype');
-  font-weight: 800; font-style: normal; font-display: swap;
-}
-@font-face {
-  font-family: 'Madera';
-  src: local('Madera Extra Bold Italic'), url('/fonts/Madera-Extra-Bold-Italic.ttf') format('truetype');
-  font-weight: 800; font-style: italic; font-display: swap;
 }
 
 :root {
   /* Paleta estilo Reflect */
-  --bg: #f7f7f5;          /* fundo papel claro */
-  --surface: #ffffff;     /* cartões/barras */
-  --ink: #0f172a;         /* slate-900 */
-  --muted: #64748b;       /* slate-500/600 */
-  --border: #e5e7eb;      /* cinza claro */
-  --pill: #f1f5f9;        /* chips */
+  --bg: #f7f7f5;        /* fundo papel claro */
+  --surface: #ffffff;   /* cartões/barras */
+  --ink: #0f172a;       /* slate-900 */
+  --muted: #64748b;     /* slate-500/600 */
+  --border: #e5e7eb;    /* cinza claro */
+  --pill: #f1f5f9;      /* chips */
   --shadow: 0 8px 24px rgba(15,23,42,0.06);
 }
 
@@ -74,8 +39,8 @@ body { background: var(--bg); color: var(--ink); }
 .font-title { font-family: 'Madera', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif; }
 .font-body  { font-family: 'Ubuntu', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif; }
 
-/* Cartões/superfícies brancas (no lugar do glassmorphism) */
-.glass { 
+/* Cartões/superfícies brancas (Reflect) */
+.glass {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 16px;
@@ -85,26 +50,26 @@ body { background: var(--bg); color: var(--ink); }
 }
 
 /* Botão preto minimalista em formato pill */
-.btn-dark { 
-  background:#111; color:#fff; 
-  border-radius: 9999px; 
-  padding: 10px 16px; 
+.btn-dark {
+  background:#111; color:#fff;
+  border-radius: 9999px;
+  padding: 10px 16px;
   font-weight: 600;
 }
 .btn-dark:hover { background:#000; }
 
 /* Chips/etiquetas */
-.tag { 
-  background: var(--pill); 
-  border: 1px solid var(--border); 
+.tag {
+  background: var(--pill);
+  border: 1px solid var(--border);
   color: var(--muted);
   border-radius: 9999px;
 }
 
 /* Inputs mais “clean” */
 .input-clean {
-  background:#fff; 
-  border:1px solid var(--border); 
-  border-radius: 12px; 
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius: 12px;
   padding:10px 12px;
 }
