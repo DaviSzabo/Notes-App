@@ -182,66 +182,70 @@ export default function Page() {
     <div className="min-h-screen font-body">
       {/* Top bar (branca para contraste) */}
       <header className="sticky top-0 z-40 bg-white border-b border-neutral-200">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <div className="size-8 rounded-full bg-black text-white grid place-items-center font-semibold font-title">N</div>
-            <div className="leading-tight">
-              <div className="font-semibold font-title">Notes Feed</div>
-              <div className="text-xs text-slate-500">Estilo Reflect</div>
-            </div>
-          </div>
+  <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
+    <div className="flex items-center gap-2">
+      <div className="size-8 rounded-full bg-black text-white grid place-items-center font-semibold font-title">N</div>
+      <div className="leading-tight">
+        <div className="font-semibold font-title text-slate-900">Notes Feed</div>
+        <div className="text-xs text-slate-500">Estilo Reflect</div>
+      </div>
+    </div>
 
-          <div className="hidden md:flex items-center gap-2 ml-6 flex-1">
-            {/* Search com espaçamento/lupa maiores */}
-            <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-slate-400" />
-              <input
-                value={q}
-                onChange={(e) => { setQ(e.target.value); setLimit(12); }}
-                placeholder="Buscar notas, autores e categorias"
-                className="w-full pl-12 pr-4 py-3 input-clean"
-              />
-            </div>
+    <div className="hidden md:flex items-center gap-2 ml-6 flex-1">
+      {/* Search com mais respiro */}
+      <div className="relative flex-1">
+        <Search className="pointer-events-none absolute left-6 top-1/2 -translate-y-1/2 size-5 text-slate-400" />
+        <input
+          value={q}
+          onChange={(e) => { setQ(e.target.value); setLimit(12); }}
+          placeholder="Buscar notas, autores e categorias"
+          className="w-full pl-14 pr-4 py-3 input-clean rounded-full"
+        />
+      </div>
 
-            {/* Select + ícone de filtro com padding correto */}
-            <div className="relative">
-              <select value={cat} onChange={(e) => { setCat(e.target.value); setLimit(12); }} className="pr-12 pl-3 py-3 input-clean">
-                <option>Todos</option>
-                {categories.map(c => <option key={c}>{c}</option>)}
-              </select>
-              <Filter className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 size-5 text-slate-400" />
-            </div>
+      {/* Select + ícone de filtro alinhados */}
+      <div className="relative">
+        <select
+          value={cat}
+          onChange={(e) => { setCat(e.target.value); setLimit(12); }}
+          className="pr-12 pl-3 py-3 input-clean rounded-full"
+        >
+          <option>Todos</option>
+          {categories.map(c => <option key={c}>{c}</option>)}
+        </select>
+        <Filter className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 size-5 text-slate-400" />
+      </div>
 
-            {/* toggles com contraste */}
-            <div className="flex items-center gap-1 border border-[var(--border)] rounded-full p-1 bg-[var(--elev)]">
-              <button
-                onClick={() => setView('grid')}
-                className={`px-2.5 py-1.5 rounded-full border toolbar-toggle ${view==='grid'?'active':''}`}
-                title="Grid"
-              >
-                <LayoutGrid className="size-4" />
-              </button>
-              <button
-                onClick={() => setView('list')}
-                className={`px-2.5 py-1.5 rounded-full border toolbar-toggle ${view==='list'?'active':''}`}
-                title="Lista"
-              >
-                <List className="size-4" />
-              </button>
-            </div>
+      {/* Toggles com contraste (mantém seu CSS atual) */}
+      <div className="flex items-center gap-1 border border-[var(--border)] rounded-full p-1 bg-[var(--elev)]">
+        <button
+          onClick={() => setView('grid')}
+          className={`px-2.5 py-1.5 rounded-full border toolbar-toggle ${view==='grid'?'active':''}`}
+          title="Grid"
+        >
+          <LayoutGrid className="size-4" />
+        </button>
+        <button
+          onClick={() => setView('list')}
+          className={`px-2.5 py-1.5 rounded-full border toolbar-toggle ${view==='list'?'active':''}`}
+          title="Lista"
+        >
+          <List className="size-4" />
+        </button>
+      </div>
 
-            <button onClick={() => setOpen(true)} className="inline-flex items-center gap-2 btn-dark font-title">
-              <Plus className="size-4" />Nova nota
-            </button>
-          </div>
+      <button onClick={() => setOpen(true)} className="inline-flex items-center gap-2 btn-dark font-title rounded-full">
+        <Plus className="size-4" />Nova nota
+      </button>
+    </div>
 
-          <div className="md:hidden ml-auto">
-            <button onClick={() => setOpen(true)} className="inline-flex items-center gap-2 btn-dark font-title">
-              <Plus className="size-4" />Nova
-            </button>
-          </div>
-        </div>
-      </header>
+    <div className="md:hidden ml-auto">
+      <button onClick={() => setOpen(true)} className="inline-flex items-center gap-2 btn-dark font-title rounded-full">
+        <Plus className="size-4" />Nova
+      </button>
+    </div>
+  </div>
+</header>
 
       <div className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-[220px_1fr_260px] gap-6">
         {/* Left */}
