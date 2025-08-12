@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {
   Plus, Paperclip, Search, Filter, Tag, Trash2, Download, X, Upload,
   Image as ImageIcon, FileText, Film, FileSpreadsheet, FileType2,
-  LayoutGrid, List, Clock3, CheckCircle2, XCircle,
+  Clock3, CheckCircle2, XCircle,
 } from 'lucide-react';
 
 // ===================== Utils =====================
@@ -64,13 +64,12 @@ export default function Page() {
   const [cat, setCat] = useState('Todos');
   const [sort, setSort] = useState<'new' | 'old'>('new');
   const [onlyWithAtt, setOnlyWithAtt] = useState(false);
-  const [view, setView] = useState<'grid' | 'list'>('grid');
   const [limit, setLimit] = useState(12);
 
-  // quick composer
-  const [qcTitle, setQcTitle] = useState('');
-  const [qcCat, setQcCat] = useState('Geral');
-  const [qcFiles, setQcFiles] = useState<Att[]>([]);
+  // quick composer (decorativo)
+  const [qcTitle] = useState('');
+  const [qcCat] = useState('Geral');
+  const [qcFiles] = useState<Att[]>([]);
 
   // modal criação
   const [open, setOpen] = useState(false);
@@ -123,16 +122,16 @@ export default function Page() {
 
   const createNote = (payload?: Partial<Note>) => {
     const base = payload || {
-      title: (title || qcTitle).trim() || '(Sem título)',
+      title: (title).trim() || '(Sem título)',
       content: content.trim(),
       author: author.trim() || 'Anônimo',
-      category: (category || qcCat) || 'Geral',
-      attachments: files.length ? files : qcFiles,
+      category: (category) || 'Geral',
+      attachments: files,
     };
     if (!base.title && !base.content && (!base.attachments || base.attachments.length === 0)) return;
     const n: Note = { id: crypto.randomUUID(), createdAt: new Date().toISOString(), ...(base as any) };
     setNotes(prev => [n, ...prev]);
-    resetModal(); setQcTitle(''); setQcCat('Geral'); setQcFiles([]); setOpen(false);
+    resetModal(); setOpen(false);
   };
 
   const delNote = (id: string) =>
@@ -220,23 +219,6 @@ export default function Page() {
               <Filter className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
             </div>
 
-            <div className="flex items-center gap-1 border border-[var(--border)] rounded-full p-1 bg-[var(--elev)]">
-              <button
-                onClick={() => setView('grid')}
-                className={`px-2.5 py-1.5 rounded-full border toolbar-toggle ${view==='grid'?'active':''}`}
-                title="Grid"
-              >
-                <LayoutGrid className="size-4" />
-              </button>
-              <button
-                onClick={() => setView('list')}
-                className={`px-2.5 py-1.5 rounded-full border toolbar-toggle ${view==='list'?'active':''}`}
-                title="Lista"
-              >
-                <List className="size-4" />
-              </button>
-            </div>
-
             <button onClick={() => setOpen(true)} className="button">
               <span className="inline-flex items-center gap-2">
                 <Plus className="size-4" />
@@ -297,15 +279,11 @@ export default function Page() {
             }}
             aria-label="Abrir criador de nota"
           >
-            {/* Aura/hover sutil */}
             <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-transparent group-hover:ring-white/10 transition" />
-          
             <div className="flex items-center gap-2 mb-3">
               <div className="size-7 rounded-full bg-black text-white grid place-items-center font-semibold font-title">N</div>
-          
-              {/* Título — visual apenas */}
               <input
-                value={qcTitle}
+                value=""
                 placeholder="Escreva um título rápido…"
                 className="flex-1 input-clean py-3"
                 readOnly
@@ -314,10 +292,8 @@ export default function Page() {
                 aria-hidden="true"
                 style={{ pointerEvents: 'none' }}
               />
-          
-              {/* Categoria — visual apenas */}
               <select
-                value={qcCat}
+                value="Geral"
                 className="input-clean py-3"
                 tabIndex={-1}
                 aria-hidden="true"
@@ -325,8 +301,6 @@ export default function Page() {
               >
                 {categories.map(c => <option key={c}>{c}</option>)}
               </select>
-          
-              {/* Anexar — visual apenas */}
               <label
                 className="inline-flex items-center gap-2 text-sm input-clean py-3 cursor-default"
                 tabIndex={-1}
@@ -336,8 +310,6 @@ export default function Page() {
                 <Paperclip className="size-4" />
                 Anexar
               </label>
-          
-              {/* Botão — visual apenas */}
               <button
                 type="button"
                 className="button"
@@ -348,24 +320,13 @@ export default function Page() {
                 <span>Postar</span>
               </button>
             </div>
-          
-            {/* Thumbs — também decorativas quando existirem */}
-            {qcFiles.length > 0 && (
-              <div
-                className="flex gap-2 overflow-x-auto"
-                aria-hidden="true"
-                style={{ pointerEvents: 'none' }}
-              >
-                {qcFiles.map(f => <Thumb key={f.id} a={f} />)}
-              </div>
-            )}
           </section>
 
-          {/* Feed */}
+          {/* Feed — FIXO EM LISTA */}
           {visible.length === 0 ? (
             <Empty onNew={() => setOpen(true)} />
           ) : (
-            <div className={view === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4' : 'space-y-3'}>
+            <div className="space-y-3">
               {visible.map(n => (
                 <Card
                   key={n.id}
@@ -397,6 +358,7 @@ export default function Page() {
                     <option value="old">Mais antigas</option>
                   </select>
                 </div>
+
                 {/* Checkbox estilizado (Uiverse) */}
                 <div className="checkbox-wrapper-4 mt-1">
                   <input
@@ -419,13 +381,6 @@ export default function Page() {
                       <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
                     </symbol>
                   </svg>
-                </div>
-                <div>
-                  <label className="text-xs text-slate-400">Exibição</label>
-                  <div className="flex items-center gap-1 border border-[var(--border)] rounded-full p-1 bg-[var(--elev)] mt-1">
-                    <button onClick={() => setView('grid')} className={`px-2.5 py-1.5 rounded-full border toolbar-toggle ${view==='grid'?'active':''}`} title="Grid"><LayoutGrid className="size-4" /></button>
-                    <button onClick={() => setView('list')} className={`px-2.5 py-1.5 rounded-full border toolbar-toggle ${view==='list'?'active':''}`} title="Lista"><List className="size-4" /></button>
-                  </div>
                 </div>
               </div>
             </div>
@@ -450,9 +405,8 @@ export default function Page() {
             <div className="glass p-4">
               <h3 className="font-semibold text-sm font-title">Dicas</h3>
               <ul className="mt-2 text-sm text-slate-400 list-disc list-inside space-y-1">
-                <li>Use o compositor rápido para ideias instantâneas.</li>
+                <li>Use o compositor rápido (clique para abrir o modal).</li>
                 <li>Arraste arquivos no modal para anexá-los.</li>
-                <li>Alterne Grid/Lista conforme sua preferência.</li>
               </ul>
             </div>
           </div>
