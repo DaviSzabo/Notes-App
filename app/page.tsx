@@ -204,17 +204,15 @@ export default function Page() {
     </div>
 
       {/* Select + ícone de filtro alinhados */}
-      <div className="relative">
-        <select
-          value={cat}
-          onChange={(e) => { setCat(e.target.value); setLimit(12); }}
-          className="pr-12 pl-3 py-3 input-clean rounded-full"
-        >
-          <option>Todos</option>
-          {categories.map(c => <option key={c}>{c}</option>)}
-        </select>
-        <Filter className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 size-5 text-slate-400" />
-      </div>
+      <select
+        value={cat}
+        onChange={(e) => { setCat(e.target.value); setLimit(12); }}
+        className="select"
+        aria-label="Selecionar categoria"
+      >
+        <option>Todos</option>
+        {categories.map(c => <option key={c}>{c}</option>)}
+      </select>
 
       {/* Toggles com contraste (mantém seu CSS atual) */}
       <div className="flex items-center gap-1 border border-[var(--border)] rounded-full p-1 bg-[var(--elev)]">
@@ -430,7 +428,12 @@ export default function Page() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className="block mb-1 text-xs text-slate-400">Categoria</label>
-                <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full input-clean">
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full select"
+                  aria-label="Selecionar categoria da nota"
+                >
                   {categories.map(c => <option key={c}>{c}</option>)}
                 </select>
               </div>
