@@ -234,7 +234,7 @@ export default function Page() {
         </button>
       </div>
 
-    <button onClick={() => setOpen(true)} className="btn2">
+    <button onClick={() => setOpen(true)} className="button">
       <span className="inline-flex items-center gap-2">
         <Plus className="size-4" />
         Nova nota
@@ -303,7 +303,7 @@ export default function Page() {
                     attachments: qcFiles,
                   })
                 }
-                className="btn2"
+                className="button"
               >
                 <span>Postar</span>
               </button>
@@ -466,7 +466,7 @@ export default function Page() {
               <button onClick={() => setOpen(false)} className="btn-ghost">Cancelar</button>
               <div className="flex items-center justify-end gap-2 pt-2">
                 <button onClick={() => setOpen(false)} className="btn-ghost">Cancelar</button>
-                <button onClick={() => createNote()} className="btn2">
+                <button onClick={() => createNote()} className="button">
                   <span className="inline-flex items-center gap-2">
                     <Plus className="size-4" />
                     Salvar nota
