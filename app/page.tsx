@@ -180,7 +180,7 @@ export default function Page() {
 
   return (
     <div className="min-h-screen font-body">
-      {/* Top bar (branca) */}
+      {/* Top bar (branca para contraste) */}
       <header className="sticky top-0 z-40 bg-white border-b border-neutral-200">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
           <div className="flex items-center gap-2">
@@ -190,35 +190,51 @@ export default function Page() {
               <div className="text-xs text-slate-500">Estilo Reflect</div>
             </div>
           </div>
+
           <div className="hidden md:flex items-center gap-2 ml-6 flex-1">
+            {/* Search com espaçamento/lupa maiores */}
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-slate-400" />
               <input
                 value={q}
                 onChange={(e) => { setQ(e.target.value); setLimit(12); }}
                 placeholder="Buscar notas, autores e categorias"
-                className="w-full pl-9 pr-3 py-2 input-clean"
+                className="w-full pl-12 pr-4 py-3 input-clean"
               />
             </div>
+
+            {/* Select + ícone de filtro com padding correto */}
             <div className="relative">
-              <select value={cat} onChange={(e) => { setCat(e.target.value); setLimit(12); }} className="pr-8 pl-3 py-2 input-clean">
+              <select value={cat} onChange={(e) => { setCat(e.target.value); setLimit(12); }} className="pr-12 pl-3 py-3 input-clean">
                 <option>Todos</option>
                 {categories.map(c => <option key={c}>{c}</option>)}
               </select>
-              <Filter className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
+              <Filter className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 size-5 text-slate-400" />
             </div>
-            <div className="flex items-center gap-1 border border-[var(--border)] rounded-full p-1 bg-white">
-              <button onClick={() => setView('grid')} className={`px-2 py-1 rounded-full ${view === 'grid' ? 'bg-[var(--pill)]' : ''}`} title="Grid">
+
+            {/* toggles com contraste */}
+            <div className="flex items-center gap-1 border border-[var(--border)] rounded-full p-1 bg-[var(--elev)]">
+              <button
+                onClick={() => setView('grid')}
+                className={`px-2.5 py-1.5 rounded-full border toolbar-toggle ${view==='grid'?'active':''}`}
+                title="Grid"
+              >
                 <LayoutGrid className="size-4" />
               </button>
-              <button onClick={() => setView('list')} className={`px-2 py-1 rounded-full ${view === 'list' ? 'bg-[var(--pill)]' : ''}`} title="Lista">
+              <button
+                onClick={() => setView('list')}
+                className={`px-2.5 py-1.5 rounded-full border toolbar-toggle ${view==='list'?'active':''}`}
+                title="Lista"
+              >
                 <List className="size-4" />
               </button>
             </div>
+
             <button onClick={() => setOpen(true)} className="inline-flex items-center gap-2 btn-dark font-title">
               <Plus className="size-4" />Nova nota
             </button>
           </div>
+
           <div className="md:hidden ml-auto">
             <button onClick={() => setOpen(true)} className="inline-flex items-center gap-2 btn-dark font-title">
               <Plus className="size-4" />Nova
@@ -231,7 +247,7 @@ export default function Page() {
         {/* Left */}
         <aside className="hidden lg:block">
           <nav className="sticky top-20">
-            <div className="text-xs uppercase tracking-wider text-slate-600">Categorias</div>
+            <div className="text-xs uppercase tracking-wider text-slate-400">Categorias</div>
             <ul className="mt-2 space-y-2">
               <li>
                 <button
@@ -261,11 +277,11 @@ export default function Page() {
           <section className="glass p-4 mb-4">
             <div className="flex items-center gap-2 mb-3">
               <div className="size-7 rounded-full bg-black text-white grid place-items-center font-semibold font-title">N</div>
-              <input value={qcTitle} onChange={(e) => setQcTitle(e.target.value)} placeholder="Escreva um título rápido…" className="flex-1 input-clean" />
-              <select value={qcCat} onChange={(e) => setQcCat(e.target.value)} className="input-clean">
+              <input value={qcTitle} onChange={(e) => setQcTitle(e.target.value)} placeholder="Escreva um título rápido…" className="flex-1 input-clean py-3" />
+              <select value={qcCat} onChange={(e) => setQcCat(e.target.value)} className="input-clean py-3">
                 {categories.map(c => <option key={c}>{c}</option>)}
               </select>
-              <label className="inline-flex items-center gap-1 text-sm input-clean cursor-pointer">
+              <label className="inline-flex items-center gap-2 text-sm input-clean py-3 cursor-pointer">
                 <Paperclip className="size-4" />
                 <input type="file" multiple className="hidden" onChange={(e) => addFiles((e.target as HTMLInputElement).files!, setQcFiles)} />
                 Anexar
@@ -304,11 +320,11 @@ export default function Page() {
             <div className="glass p-4">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold text-sm font-title">Filtros</h3>
-                <Clock3 className="size-4 text-slate-500" />
+                <Clock3 className="size-4 text-slate-400" />
               </div>
               <div className="mt-3 space-y-3">
                 <div>
-                  <label className="text-xs text-slate-700">Ordenar</label>
+                  <label className="text-xs text-slate-400">Ordenar</label>
                   <select value={sort} onChange={(e) => { setSort(e.target.value as 'new' | 'old'); setLimit(12); }} className="mt-1 w-full input-clean">
                     <option value="new">Mais recentes</option>
                     <option value="old">Mais antigas</option>
@@ -319,10 +335,10 @@ export default function Page() {
                   <label htmlFor="onlyAtt" className="text-sm">Apenas com anexos</label>
                 </div>
                 <div>
-                  <label className="text-xs text-slate-700">Exibição</label>
-                  <div className="flex items-center gap-1 border border-[var(--border)] rounded-full p-1 bg-white mt-1">
-                    <button onClick={() => setView('grid')} className={`px-2 py-1 rounded-full ${view === 'grid' ? 'bg-[var(--pill)]' : ''}`} title="Grid"><LayoutGrid className="size-4" /></button>
-                    <button onClick={() => setView('list')} className={`px-2 py-1 rounded-full ${view === 'list' ? 'bg-[var(--pill)]' : ''}`} title="Lista"><List className="size-4" /></button>
+                  <label className="text-xs text-slate-400">Exibição</label>
+                  <div className="flex items-center gap-1 border border-[var(--border)] rounded-full p-1 bg-[var(--elev)] mt-1">
+                    <button onClick={() => setView('grid')} className={`px-2.5 py-1.5 rounded-full border toolbar-toggle ${view==='grid'?'active':''}`} title="Grid"><LayoutGrid className="size-4" /></button>
+                    <button onClick={() => setView('list')} className={`px-2.5 py-1.5 rounded-full border toolbar-toggle ${view==='list'?'active':''}`} title="Lista"><List className="size-4" /></button>
                   </div>
                 </div>
               </div>
@@ -330,15 +346,15 @@ export default function Page() {
 
             <div className="glass p-4">
               <h3 className="font-semibold text-sm font-title">Testes</h3>
-              <p className="text-sm text-slate-700 mt-1">Clique para executar checks rápidos de UI/lógica.</p>
+              <p className="text-sm text-slate-400 mt-1">Clique para executar checks rápidos de UI/lógica.</p>
               <button onClick={runTests} className="mt-3 btn-dark font-title">Executar testes</button>
               <ul className="mt-3 space-y-2">
                 {tests.map((t, i) => (
                   <li key={i} className="flex items-start gap-2 text-sm">
-                    {t.pass ? <CheckCircle2 className="size-4 text-emerald-600" /> : <XCircle className="size-4 text-rose-600" />}
+                    {t.pass ? <CheckCircle2 className="size-4 text-emerald-500" /> : <XCircle className="size-4 text-rose-500" />}
                     <span>
                       <span className="font-medium">{t.name}</span>
-                      <span className="block text-xs text-slate-600">{String(t.details)}</span>
+                      <span className="block text-xs text-slate-500">{String(t.details)}</span>
                     </span>
                   </li>
                 ))}
@@ -347,7 +363,7 @@ export default function Page() {
 
             <div className="glass p-4">
               <h3 className="font-semibold text-sm font-title">Dicas</h3>
-              <ul className="mt-2 text-sm text-slate-700 list-disc list-inside space-y-1">
+              <ul className="mt-2 text-sm text-slate-400 list-disc list-inside space-y-1">
                 <li>Use o compositor rápido para ideias instantâneas.</li>
                 <li>Arraste arquivos no modal para anexá-los.</li>
                 <li>Alterne Grid/Lista conforme sua preferência.</li>
@@ -363,31 +379,31 @@ export default function Page() {
           <div className="p-4 space-y-3">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
-                <label className="text-xs text-slate-700 font-medium">Título</label>
-                <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Resumo da reunião, ideia, tarefa..." className="mt-1 w-full input-clean" />
+                <label className="block mb-1 text-xs text-slate-400">Título</label>
+                <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Resumo da reunião, ideia, tarefa..." className="w-full input-clean" />
               </div>
               <div>
-                <label className="text-xs text-slate-700 font-medium">Autor</label>
-                <input value={author} onChange={(e) => setAuthor(e.target.value)} placeholder="Seu nome" className="mt-1 w-full input-clean" />
+                <label className="block mb-1 text-xs text-slate-400">Autor</label>
+                <input value={author} onChange={(e) => setAuthor(e.target.value)} placeholder="Seu nome" className="w-full input-clean" />
               </div>
             </div>
             <div>
-              <label className="text-xs text-slate-700 font-medium">Conteúdo</label>
-              <textarea value={content} onChange={(e) => setContent(e.target.value)} rows={4} placeholder="Digite sua nota..." className="mt-1 w-full input-clean" />
+              <label className="block mb-1 text-xs text-slate-400">Conteúdo</label>
+              <textarea value={content} onChange={(e) => setContent(e.target.value)} rows={4} placeholder="Digite sua nota..." className="w-full input-clean" />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
-                <label className="text-xs text-slate-700 font-medium">Categoria</label>
-                <select value={category} onChange={(e) => setCategory(e.target.value)} className="mt-1 w-full input-clean">
+                <label className="block mb-1 text-xs text-slate-400">Categoria</label>
+                <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full input-clean">
                   {categories.map(c => <option key={c}>{c}</option>)}
                 </select>
               </div>
               <div>
-                <label className="text-xs text-slate-700 font-medium">Anexos</label>
-                <div ref={dropRef} className="mt-1 glass px-4 py-6 text-center">
-                  <div className="mx-auto size-10 rounded-full bg-[var(--pill)] border border-[var(--border)] grid place-items-center"><Upload className="size-5 text-slate-600" /></div>
-                  <p className="text-sm mt-2">Arraste e solte arquivos aqui</p>
-                  <p className="text-xs text-slate-600">PNG, JPG, MP4, PDF, DOCX, XLSX, etc.</p>
+                <label className="block mb-1 text-xs text-slate-400">Anexos</label>
+                <div ref={dropRef} className="glass px-4 py-6 text-center">
+                  <div className="mx-auto size-10 rounded-full bg-[var(--pill)] border border-[var(--border)] grid place-items-center"><Upload className="size-5 text-slate-400" /></div>
+                  <p className="text-sm mt-2 text-slate-300">Arraste e solte arquivos aqui</p>
+                  <p className="text-xs text-slate-500">PNG, JPG, MP4, PDF, DOCX, XLSX, etc.</p>
                   <div className="mt-3">
                     <input ref={inputRef} type="file" multiple onChange={(e) => addFiles((e.target as HTMLInputElement).files!, setFiles)} className="hidden" id="file-input" />
                     <label htmlFor="file-input" className="inline-flex items-center gap-2 btn-dark cursor-pointer"><Paperclip className="size-4" /> Selecionar arquivos</label>
@@ -395,14 +411,14 @@ export default function Page() {
                   {files.length > 0 && (
                     <div className="text-left mt-3 max-h-40 overflow-auto">
                       {files.map(f => (
-                        <div key={f.id} className="flex items-center gap-3 p-2 rounded-xl hover:bg-[var(--pill)]">
+                        <div key={f.id} className="flex items-center gap-3 p-2 rounded-xl bg-[var(--elev)] border border-[var(--border)]">
                           <Icon kind={f.kind} className="size-5" />
                           <div className="min-w-0 flex-1">
                             <div className="truncate text-sm" title={f.name}>{f.name}</div>
-                            {typeof f.size === 'number' ? <div className="text-xs text-slate-600">{fmtBytes(f.size)}</div> : null}
+                            {typeof f.size === 'number' ? <div className="text-xs text-slate-500">{fmtBytes(f.size)}</div> : null}
                           </div>
-                          <a href={f.url} download={f.name} className="text-slate-700 hover:text-black" title="Baixar"><Download className="size-4" /></a>
-                          <button onClick={() => setFiles(prev => { const g = prev.find(x => x.id === f.id); if (g?.url) URL.revokeObjectURL(g.url); return prev.filter(x => x.id !== f.id); })} className="text-slate-500 hover:text-rose-600" title="Remover"><X className="size-4" /></button>
+                          <a href={f.url} download={f.name} className="text-slate-200 hover:text-white" title="Baixar"><Download className="size-4" /></a>
+                          <button onClick={() => setFiles(prev => { const g = prev.find(x => x.id === f.id); if (g?.url) URL.revokeObjectURL(g.url); return prev.filter(x => x.id !== f.id); })} className="text-slate-400 hover:text-rose-400" title="Remover"><X className="size-4" /></button>
                         </div>
                       ))}
                     </div>
@@ -411,14 +427,14 @@ export default function Page() {
               </div>
             </div>
             <div className="flex items-center justify-end gap-2 pt-2">
-              <button onClick={() => setOpen(false)} className="px-3 py-2 rounded-full border border-[var(--border)] bg-white hover:bg-[var(--pill)]">Cancelar</button>
+              <button onClick={() => setOpen(false)} className="btn-ghost">Cancelar</button>
               <button onClick={() => createNote()} className="inline-flex items-center gap-2 btn-dark font-title"><Plus className="size-4" />Salvar nota</button>
             </div>
           </div>
         </Modal>
       )}
 
-      <footer className="py-10 text-center text-xs text-slate-600">Feito com ❤️ — dados salvos localmente no seu navegador</footer>
+      <footer className="py-10 text-center text-xs text-slate-500">Feito com ❤️ — dados salvos localmente no seu navegador</footer>
     </div>
   );
 }
@@ -436,7 +452,7 @@ function Card({ n, onDelete, prettyDate }: { n: Note; onDelete: () => void; pret
             <video src={first.url} className="h-48 w-full object-cover bg-black" />
           ) : (
             <div className="h-48 w-full grid place-items-center bg-[var(--pill)]">
-              <Icon kind={first.kind} className="size-8 text-slate-700" />
+              <Icon kind={first.kind} className="size-8 text-slate-300" />
             </div>
           )}
           {n.attachments?.length > 1 && (
@@ -452,11 +468,11 @@ function Card({ n, onDelete, prettyDate }: { n: Note; onDelete: () => void; pret
             <div className="flex items-center gap-2 flex-wrap">
               <h3 className="font-semibold truncate font-title" title={n.title}>{n.title}</h3>
               <span className="inline-flex items-center gap-1 tag px-2 py-1"><Tag className="size-3" />{n.category}</span>
-              <span className="text-xs text-slate-500">{prettyDate(n.createdAt)}</span>
+              <span className="text-xs text-slate-400">{prettyDate(n.createdAt)}</span>
             </div>
-            {n.content && <p className="text-sm text-slate-800 mt-1 whitespace-pre-wrap line-clamp-3">{n.content}</p>}
+            {n.content && <p className="text-sm text-slate-200 mt-1 whitespace-pre-wrap line-clamp-3">{n.content}</p>}
           </div>
-          <button onClick={onDelete} className="text-slate-500 hover:text-rose-600" title="Excluir nota">
+          <button onClick={onDelete} className="text-slate-400 hover:text-rose-400" title="Excluir nota">
             <Trash2 className="size-5" />
           </button>
         </div>
@@ -473,32 +489,32 @@ function Card({ n, onDelete, prettyDate }: { n: Note; onDelete: () => void; pret
 
 function Row({ a }: { a: Att }) {
   return (
-    <div className="flex items-center gap-3 p-2 rounded-xl border border-[var(--border)] bg-white">
+    <div className="flex items-center gap-3 p-2 rounded-xl border border-[var(--border)] bg-[var(--elev)]">
       <Icon kind={a.kind} className="size-5" />
       <div className="min-w-0 flex-1">
         <div className="truncate text-sm" title={a.name}>{a.name}</div>
-        {typeof a.size === 'number' && <div className="text-xs text-slate-600">{fmtBytes(a.size)}</div>}
+        {typeof a.size === 'number' && <div className="text-xs text-slate-500">{fmtBytes(a.size)}</div>}
       </div>
       {a.kind === 'image' ? (
-        <a href={a.url} target="_blank" rel="noreferrer" className="text-slate-900 text-sm">Abrir</a>
+        <a href={a.url} target="_blank" rel="noreferrer" className="text-slate-200 text-sm">Abrir</a>
       ) : a.kind === 'video' ? (
-        <a href={a.url} target="_blank" rel="noreferrer" className="text-slate-900 text-sm">Reproduzir</a>
+        <a href={a.url} target="_blank" rel="noreferrer" className="text-slate-200 text-sm">Reproduzir</a>
       ) : a.kind === 'pdf' ? (
-        <a href={a.url} target="_blank" rel="noreferrer" className="text-slate-900 text-sm">Visualizar</a>
+        <a href={a.url} target="_blank" rel="noreferrer" className="text-slate-200 text-sm">Visualizar</a>
       ) : (
-        <a href={a.url} download={a.name} className="text-slate-900 text-sm">Baixar</a>
+        <a href={a.url} download={a.name} className="text-slate-200 text-sm">Baixar</a>
       )}
     </div>
   );
 }
 
 function Thumb({ a }: { a: Att }) {
-  if (a.kind === 'image') return <img src={a.url} alt={a.name} className="h-20 w-28 object-cover rounded-xl border border-[var(--border)] bg-white" />;
+  if (a.kind === 'image') return <img src={a.url} alt={a.name} className="h-20 w-28 object-cover rounded-xl border border-[var(--border)] bg-[var(--elev)]" />;
   if (a.kind === 'video') return <video src={a.url} className="h-20 w-28 object-cover rounded-xl border border-[var(--border)] bg-black" />;
-  if (a.kind === 'pdf') return <div className="h-20 w-28 grid place-items-center rounded-xl border border-[var(--border)] bg-white"><FileText className="size-6" /></div>;
-  if (a.kind === 'sheet') return <div className="h-20 w-28 grid place-items-center rounded-xl border border-[var(--border)] bg-white"><FileSpreadsheet className="size-6" /></div>;
-  if (a.kind === 'doc') return <div className="h-20 w-28 grid place-items-center rounded-xl border border-[var(--border)] bg-white"><FileText className="size-6" /></div>;
-  return <div className="h-20 w-28 grid place-items-center rounded-xl border border-[var(--border)] bg-white"><FileType2 className="size-6" /></div>;
+  if (a.kind === 'pdf') return <div className="h-20 w-28 grid place-items-center rounded-xl border border-[var(--border)] bg-[var(--elev)]"><FileText className="size-6" /></div>;
+  if (a.kind === 'sheet') return <div className="h-20 w-28 grid place-items-center rounded-xl border border-[var(--border)] bg-[var(--elev)]"><FileSpreadsheet className="size-6" /></div>;
+  if (a.kind === 'doc') return <div className="h-20 w-28 grid place-items-center rounded-xl border border-[var(--border)] bg-[var(--elev)]"><FileText className="size-6" /></div>;
+  return <div className="h-20 w-28 grid place-items-center rounded-xl border border-[var(--border)] bg-[var(--elev)]"><FileType2 className="size-6" /></div>;
 }
 
 function Icon({ kind, className }: { kind: Kind; className?: string }) {
@@ -526,7 +542,7 @@ function Modal({ children, onClose }: { children: React.ReactNode; onClose: () =
       <div className="relative w-full max-w-2xl glass shadow-xl">
         <div className="flex items-center justify-between p-4 border-b border-[var(--border)]">
           <h3 className="font-semibold font-title">Nova nota</h3>
-          <button onClick={onClose} className="text-slate-600 hover:text-black"><X className="size-5" /></button>
+          <button onClick={onClose} className="text-slate-400 hover:text-white"><X className="size-5" /></button>
         </div>
         {children}
       </div>
@@ -537,9 +553,9 @@ function Modal({ children, onClose }: { children: React.ReactNode; onClose: () =
 function Empty({ onNew }: { onNew: () => void; }) {
   return (
     <div className="glass p-10 text-center">
-      <div className="mx-auto size-10 rounded-full bg-[var(--pill)] text-black grid place-items-center mb-3"><Paperclip className="size-5" /></div>
+      <div className="mx-auto size-10 rounded-full bg-[var(--pill)] text-white grid place-items-center mb-3"><Paperclip className="size-5" /></div>
       <h2 className="text-lg font-semibold font-title mb-1">Nenhuma nota por aqui</h2>
-      <p className="text-slate-700 mb-4">Crie sua primeira nota e anexe arquivos. Tudo fica salvo localmente.</p>
+      <p className="text-slate-300 mb-4">Crie sua primeira nota e anexe arquivos. Tudo fica salvo localmente.</p>
       <button onClick={onNew} className="inline-flex items-center gap-2 btn-dark font-title"><Plus className="size-4" />Nova nota</button>
     </div>
   );
