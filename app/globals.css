@@ -273,9 +273,3 @@ a:hover { opacity: .95; }
   position: relative;
   z-index: 3;
 }
-
-button {
-  text-decoration: none;
-  border: none;
-  background-color: transparent;
-}
