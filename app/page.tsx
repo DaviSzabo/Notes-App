@@ -193,15 +193,15 @@ export default function Page() {
 
     <div className="hidden md:flex items-center gap-2 ml-6 flex-1">
       {/* Search com mais respiro */}
-      <div className="relative flex-1">
-        <Search className="pointer-events-none absolute left-6 top-1/2 -translate-y-1/2 size-5 text-slate-400" />
-        <input
-          value={q}
-          onChange={(e) => { setQ(e.target.value); setLimit(12); }}
-          placeholder="Buscar notas, autores e categorias"
-          className="w-full pl-14 pr-4 py-3 input-clean rounded-full"
-        />
-      </div>
+    <div className="relative flex-1">
+      <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-5 text-slate-400" />
+      <input
+        value={q}
+        onChange={(e) => { setQ(e.target.value); setLimit(12); }}
+        placeholder="Buscar notas, autores e categorias"
+        className="w-full pl-12 pr-4 py-3 input-clean rounded-full"
+      />
+    </div>
 
       {/* Select + ícone de filtro alinhados */}
       <div className="relative">
