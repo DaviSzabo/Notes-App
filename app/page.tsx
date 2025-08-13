@@ -22,9 +22,70 @@ async function getNotes() {
   
   return data
 }
+
+import { uploadAttachments } from '@/lib/upload'
+import { createNoteDB } from '@/lib/db'
+import { deleteNoteDB } from '@/lib/db'
 // ===================== Utils =====================
 const LS_KEY = 'syn_notes_v4';
 const DEFAULT_CATS = ['Geral', 'Projeto', 'Estudos', 'Trabalho', 'Ideia'];
+
+const delNote = async (id: string) => {
+  // (opcional) remover arquivos do storage aqui, se tiver path salvo
+  // const note = notes.find(n => n.id === id)
+  // if (note) await supabase.storage.from('attachments').remove(note.attachments.map(a => a.path!).filter(Boolean))
+
+  await deleteNoteDB(id)
+  setNotes(prev => prev.filter(x => x.id !== id))
+}
+
+const createNote = async (payload?: Partial<Note>) => {
+  const base = payload || {
+    title: (title || qcTitle).trim() || '(Sem título)',
+    content: content.trim(),
+    author: (author || 'Anônimo').trim(),
+    category: (category || qcCat) || 'Geral',
+    attachments: files.length ? files : qcFiles,
+  }
+
+  // Se não tiver nada, não cria
+  if (!base.title && !base.content && (!base.attachments || base.attachments.length === 0)) return
+
+  // Faz upload (se vierem File objects). Se seus anexos já forem Att com url local,
+  // você precisará transformar os "File" de verdade aqui. No seu modal eles vêm de <input type="file">,
+  // então passe a lista de File[] para uploadAttachments ao invés do Att[] local.
+  const toUpload: File[] = []
+  ;(files.length ? files : qcFiles).forEach((a: any) => {
+    if (a instanceof File) toUpload.push(a)
+  })
+
+  const uploaded = toUpload.length ? await uploadAttachments(toUpload) : []
+  const finalAttachments: Att[] = uploaded.length ? uploaded : (base.attachments as Att[])
+
+  const saved = await createNoteDB({
+    title: base.title!,
+    content: base.content || '',
+    author: base.author || 'Anônimo',
+    category: base.category || 'Geral',
+    attachments: finalAttachments,
+  })
+
+  // adiciona no topo do feed
+  setNotes(prev => [{
+    id: saved.id,
+    title: saved.title,
+    content: saved.content,
+    author: saved.author,
+    category: saved.category,
+    createdAt: saved.created_at,
+    attachments: saved.attachments,
+  }, ...prev])
+
+  // limpa UI
+  resetModal()
+  setQcTitle(''); setQcCat('Geral'); setQcFiles([])
+  setOpen(false)
+}
 
 const fmtBytes = (b?: number) => {
   if (b === 0) return '0 B';
@@ -67,11 +128,24 @@ type Note = {
 };
 
 // ===================== Page =====================
-export default function Page() {
-  const [notes, setNotes] = useState<Note[]>(() => {
-    try { const raw = localStorage.getItem(LS_KEY); return raw ? JSON.parse(raw) : []; } catch { return []; }
-  });
-  useEffect(() => localStorage.setItem(LS_KEY, JSON.stringify(notes)), [notes]);
+
+// Use estado simples e carregue do Supabase
+const [notes, setNotes] = useState<Note[]>([])
+useEffect(() => {
+  (async () => {
+    const data = await fetchNotes()
+    // adapta o shape do DBNote -> Note (createdAt vs created_at)
+    setNotes(data.map(d => ({
+      id: d.id,
+      title: d.title,
+      content: d.content,
+      author: d.author,
+      category: d.category,
+      createdAt: d.created_at,
+      attachments: d.attachments,
+    })))
+  })()
+}, [])
 
   const categories = useMemo(
     () => Array.from(new Set([...DEFAULT_CATS, ...notes.map(n => n.category).filter(Boolean)])),
