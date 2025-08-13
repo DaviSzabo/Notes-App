@@ -46,7 +46,16 @@ const kindOf = (type?: string, name = ''): Kind => {
   return 'file';
 };
 
-type Att = { id: string; name: string; size?: number; type?: string; kind: Kind; url: string; };
+type Att = {
+  id: string;
+  name: string;
+  size?: number;
+  type?: string;
+  kind: Kind;
+  url: string;
+  path?: string; // <- novo, guarda o caminho no bucket
+};
+
 type Note = {
   id: string;
   title: string;
@@ -148,8 +157,40 @@ export default function Page() {
     resetModal(); setOpen(false);
   };
 
-  const delNote = (id: string) =>
-    setNotes(prev => { const n = prev.find(x => x.id === id); if (n) revokeUrls(n.attachments); return prev.filter(x => x.id !== id); });
+// Exclui a nota da UI/LocalStorage e remove os arquivos do bucket (se houver path)
+const delNote = async (id: string) => {
+  // 1) pegue a nota atual (antes de remover do estado)
+  const note = notes.find(n => n.id === id);
+
+  // 2) remova da UI imediatamente (app fica responsivo)
+  setNotes(prev => prev.filter(n => n.id !== id));
+
+  // 3) limpezas e deleção no storage (best-effort)
+  try {
+    // revoke URLs locais (blob:) para não vazar memória
+    note?.attachments?.forEach(a => {
+      if (a.url?.startsWith('blob:')) {
+        try { URL.revokeObjectURL(a.url); } catch {}
+      }
+    });
+
+    // colete paths válidos no bucket
+    const paths = (note?.attachments || [])
+      .map(a => a.path)
+      .filter((p): p is string => Boolean(p));
+
+    // se houver paths, remova do Supabase Storage
+    if (paths.length > 0) {
+      const { error } = await supabase.storage.from('attachments').remove(paths);
+      if (error) {
+        console.error('Erro ao deletar arquivos do Storage:', error);
+      }
+    }
+  } catch (err) {
+    console.error('Falha ao limpar anexos:', err);
+  }
+};
+
 
   const prettyDate = (iso: string) => {
     try { return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(iso)); }
@@ -564,26 +605,13 @@ function NoteDetails({
           <section>
             <h3 className="font-semibold text-white mb-2">Anexos</h3>
             <div className="grid gap-2">
-              {note.attachments.map((a) => (
-                <div key={a.id} className="flex items-center gap-3 p-2 rounded-xl bg-[var(--elev)] border border-[var(--border)]">
-                  <Icon kind={a.kind} className="size-5" />
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm text-slate-100" title={a.name}>{a.name}</div>
-                    {typeof a.size === 'number' && (
-                      <div className="text-xs text-slate-500">{fmtBytes(a.size)}</div>
-                    )}
-                  </div>
-                  {a.kind === 'image' ? (
-                    <a href={a.url} target="_blank" rel="noreferrer" className="text-slate-200 hover:text-white text-sm">Abrir</a>
-                  ) : a.kind === 'video' ? (
-                    <a href={a.url} target="_blank" rel="noreferrer" className="text-slate-200 hover:text-white text-sm">Reproduzir</a>
-                  ) : a.kind === 'pdf' ? (
-                    <a href={a.url} target="_blank" rel="noreferrer" className="text-slate-200 hover:text-white text-sm">Visualizar</a>
-                  ) : (
-                    <a href={a.url} download={a.name} className="text-slate-200 hover:text-white" title="Baixar"><Download className="size-4" /></a>
-                  )}
-                </div>
-              ))}
+            {note.attachments.map((a) => (
+              <Row
+                key={a.id}
+                a={a}
+                onRemove={() => removeAttachment(note.id, a.id)}
+              />
+            ))}
             </div>
           </section>
         )}
@@ -654,17 +682,23 @@ function Card({
           </button>
         </div>
 
-        {n.attachments?.length > 0 && (
-          <div className="mt-3 grid grid-cols-1 gap-2">
-            {n.attachments.map(a => <Row key={a.id} a={a} />)}
-          </div>
-        )}
+      {n.attachments?.length > 0 && (
+        <div className="mt-3 grid grid-cols-1 gap-2">
+          {n.attachments.map(a => (
+            <Row
+              key={a.id}
+              a={a}
+              onRemove={() => removeAttachment(n.id, a.id)}
+            />
+          ))}
+        </div>
+      )}
       </div>
     </article>
   );
 }
 
-function Row({ a }: { a: Att }) {
+function Row({ a, onRemove }: { a: Att; onRemove?: () => void }) {
   return (
     <div className="flex items-center gap-3 p-2 rounded-xl border border-[var(--border)] bg-[var(--elev)]">
       <Icon kind={a.kind} className="size-5" />
@@ -672,6 +706,7 @@ function Row({ a }: { a: Att }) {
         <div className="truncate text-sm" title={a.name}>{a.name}</div>
         {typeof a.size === 'number' && <div className="text-xs text-slate-500">{fmtBytes(a.size)}</div>}
       </div>
+
       {a.kind === 'image' ? (
         <a href={a.url} target="_blank" rel="noreferrer" className="text-slate-200 text-sm">Abrir</a>
       ) : a.kind === 'video' ? (
@@ -680,6 +715,17 @@ function Row({ a }: { a: Att }) {
         <a href={a.url} target="_blank" rel="noreferrer" className="text-slate-200 text-sm">Visualizar</a>
       ) : (
         <a href={a.url} download={a.name} className="text-slate-200 text-sm">Baixar</a>
+      )}
+
+      {onRemove && (
+        <button
+          onClick={(e) => { e.stopPropagation(); onRemove(); }}
+          className="ml-1 text-slate-400 hover:text-rose-400"
+          title="Remover anexo"
+          aria-label="Remover anexo"
+        >
+          <Trash2 className="size-4" />
+        </button>
       )}
     </div>
   );
