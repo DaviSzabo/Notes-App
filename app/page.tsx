@@ -486,6 +486,8 @@ export default function Page() {
   );
 }
 
+import { supabase } from '@/lib/supabaseClient' // ajuste o caminho
+
 // ===================== Components =====================
 
 // ======== NoteDetails (modal de leitura) ========
