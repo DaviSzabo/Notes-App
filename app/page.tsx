@@ -8,6 +8,20 @@ import {
   Clock3,
 } from 'lucide-react';
 
+import { supabase } from '@/lib/supabaseClient'
+
+// Exemplo: Buscar todas as notas
+async function getNotes() {
+  const { data, error } = await supabase
+    .from('notes')
+    .select('*')
+
+  if (error) {
+    console.error('Erro ao buscar notas:', error)
+  }
+  
+  return data
+}
 // ===================== Utils =====================
 const LS_KEY = 'syn_notes_v4';
 const DEFAULT_CATS = ['Geral', 'Projeto', 'Estudos', 'Trabalho', 'Ideia'];
