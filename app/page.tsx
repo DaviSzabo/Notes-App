@@ -4,148 +4,23 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import {
   Plus, Paperclip, Search, Filter, Tag, Trash2, Download, X, Upload,
-  Image as ImageIcon, FileText, Film, FileSpreadsheet, FileType2,
-  Clock3,
+  Image as ImageIcon, FileText, Film, FileSpreadsheet, FileType2, Clock3,
 } from 'lucide-react';
 
-import { supabase } from '@/lib/supabaseClient'
+import { Att, Note, Kind, kindOf, fmtBytes } from '@/lib/types';
+// (opcional) quando quiser subir arquivos pro Supabase, importe e use:
+// import { uploadAttachments } from '@/lib/upload';
 
-// Exemplo: Buscar todas as notas
-async function getNotes() {
-  const { data, error } = await supabase
-    .from('notes')
-    .select('*')
-
-  if (error) {
-    console.error('Erro ao buscar notas:', error)
-  }
-  
-  return data
-}
-
-import { uploadAttachments } from '@/lib/upload'
-import { createNoteDB } from '@/lib/db'
-import { deleteNoteDB } from '@/lib/db'
-// ===================== Utils =====================
+// ===================== Constantes =====================
 const LS_KEY = 'syn_notes_v4';
 const DEFAULT_CATS = ['Geral', 'Projeto', 'Estudos', 'Trabalho', 'Ideia'];
 
-const delNote = async (id: string) => {
-  // (opcional) remover arquivos do storage aqui, se tiver path salvo
-  // const note = notes.find(n => n.id === id)
-  // if (note) await supabase.storage.from('attachments').remove(note.attachments.map(a => a.path!).filter(Boolean))
-
-  await deleteNoteDB(id)
-  setNotes(prev => prev.filter(x => x.id !== id))
-}
-
-const createNote = async (payload?: Partial<Note>) => {
-  const base = payload || {
-    title: (title || qcTitle).trim() || '(Sem título)',
-    content: content.trim(),
-    author: (author || 'Anônimo').trim(),
-    category: (category || qcCat) || 'Geral',
-    attachments: files.length ? files : qcFiles,
-  }
-
-  // Se não tiver nada, não cria
-  if (!base.title && !base.content && (!base.attachments || base.attachments.length === 0)) return
-
-  // Faz upload (se vierem File objects). Se seus anexos já forem Att com url local,
-  // você precisará transformar os "File" de verdade aqui. No seu modal eles vêm de <input type="file">,
-  // então passe a lista de File[] para uploadAttachments ao invés do Att[] local.
-  const toUpload: File[] = []
-  ;(files.length ? files : qcFiles).forEach((a: any) => {
-    if (a instanceof File) toUpload.push(a)
-  })
-
-  const uploaded = toUpload.length ? await uploadAttachments(toUpload) : []
-  const finalAttachments: Att[] = uploaded.length ? uploaded : (base.attachments as Att[])
-
-  const saved = await createNoteDB({
-    title: base.title!,
-    content: base.content || '',
-    author: base.author || 'Anônimo',
-    category: base.category || 'Geral',
-    attachments: finalAttachments,
-  })
-
-  // adiciona no topo do feed
-  setNotes(prev => [{
-    id: saved.id,
-    title: saved.title,
-    content: saved.content,
-    author: saved.author,
-    category: saved.category,
-    createdAt: saved.created_at,
-    attachments: saved.attachments,
-  }, ...prev])
-
-  // limpa UI
-  resetModal()
-  setQcTitle(''); setQcCat('Geral'); setQcFiles([])
-  setOpen(false)
-}
-
-const fmtBytes = (b?: number) => {
-  if (b === 0) return '0 B';
-  if (!b) return '';
-  const k = 1024, s = ['B', 'KB', 'MB', 'GB', 'TB'];
-  const i = Math.floor(Math.log(Math.max(b, 1)) / Math.log(k));
-  return `${(b / Math.pow(k, i)).toFixed(1)} ${s[i]}`;
-};
-
-type Kind = 'image' | 'video' | 'pdf' | 'doc' | 'sheet' | 'file';
-const kindOf = (type?: string, name = ''): Kind => {
-  const t = (type || '').toLowerCase();
-  const ext = name.split('.').pop()?.toLowerCase() || '';
-  if (t.startsWith('image/')) return 'image';
-  if (t.startsWith('video/')) return 'video';
-  if (t === 'application/pdf' || ext === 'pdf') return 'pdf';
-  if (['doc', 'docx'].includes(ext)) return 'doc';
-  if (['xls', 'xlsx', 'csv'].includes(ext)) return 'sheet';
-  return 'file';
-};
-
-type Att = {
-  id: string;
-  name: string;
-  size?: number;
-  type?: string;
-  kind: Kind;
-  url: string;
-  path?: string; // <- novo, guarda o caminho no bucket
-};
-
-type Note = {
-  id: string;
-  title: string;
-  content: string;
-  author: string;
-  category: string;
-  createdAt: string;
-  attachments: Att[];
-};
-
-// ===================== Page =====================
-
-// Use estado simples e carregue do Supabase
-const [notes, setNotes] = useState<Note[]>([])
-useEffect(() => {
-  (async () => {
-    const data = await fetchNotes()
-    // adapta o shape do DBNote -> Note (createdAt vs created_at)
-    setNotes(data.map(d => ({
-      id: d.id,
-      title: d.title,
-      content: d.content,
-      author: d.author,
-      category: d.category,
-      createdAt: d.created_at,
-      attachments: d.attachments,
-    })))
-  })()
-}, [])
+// ===================== Página =====================
+export default function Page() {
+  const [notes, setNotes] = useState<Note[]>(() => {
+    try { const raw = localStorage.getItem(LS_KEY); return raw ? JSON.parse(raw) : []; } catch { return []; }
+  });
+  useEffect(() => localStorage.setItem(LS_KEY, JSON.stringify(notes)), [notes]);
 
   const categories = useMemo(
     () => Array.from(new Set([...DEFAULT_CATS, ...notes.map(n => n.category).filter(Boolean)])),
@@ -163,7 +38,7 @@ useEffect(() => {
   const [onlyWithAtt, setOnlyWithAtt] = useState(false);
   const [limit, setLimit] = useState(12);
 
-  // quick composer (decorativo)
+  // quick composer (somente visual)
   const [qcTitle] = useState('');
   const [qcCat] = useState('Geral');
   const [qcFiles] = useState<Att[]>([]);
@@ -217,12 +92,15 @@ useEffect(() => {
   const revokeUrls = (atts: Att[] = []) => atts.forEach(a => a.url && URL.revokeObjectURL(a.url));
   const resetModal = () => { setTitle(''); setContent(''); setAuthor(''); setCategory('Geral'); setFiles([]); if (inputRef.current) inputRef.current.value = ''; };
 
-  const createNote = (payload?: Partial<Note>) => {
+  const createNote = async (payload?: Partial<Note>) => {
+    // Se quiser enviar os arquivos pro Supabase, troque `files` por:
+    // const uploaded = await uploadAttachments(filesFromInput);
+    // e use `attachments: uploaded`
     const base = payload || {
       title: (title).trim() || '(Sem título)',
       content: content.trim(),
-      author: author.trim() || 'Anônimo',
-      category: (category) || 'Geral',
+      author: (author || '').trim() || 'Anônimo',
+      category: category || 'Geral',
       attachments: files,
     };
     if (!base.title && !base.content && (!base.attachments || base.attachments.length === 0)) return;
@@ -231,40 +109,8 @@ useEffect(() => {
     resetModal(); setOpen(false);
   };
 
-// Exclui a nota da UI/LocalStorage e remove os arquivos do bucket (se houver path)
-const delNote = async (id: string) => {
-  // 1) pegue a nota atual (antes de remover do estado)
-  const note = notes.find(n => n.id === id);
-
-  // 2) remova da UI imediatamente (app fica responsivo)
-  setNotes(prev => prev.filter(n => n.id !== id));
-
-  // 3) limpezas e deleção no storage (best-effort)
-  try {
-    // revoke URLs locais (blob:) para não vazar memória
-    note?.attachments?.forEach(a => {
-      if (a.url?.startsWith('blob:')) {
-        try { URL.revokeObjectURL(a.url); } catch {}
-      }
-    });
-
-    // colete paths válidos no bucket
-    const paths = (note?.attachments || [])
-      .map(a => a.path)
-      .filter((p): p is string => Boolean(p));
-
-    // se houver paths, remova do Supabase Storage
-    if (paths.length > 0) {
-      const { error } = await supabase.storage.from('attachments').remove(paths);
-      if (error) {
-        console.error('Erro ao deletar arquivos do Storage:', error);
-      }
-    }
-  } catch (err) {
-    console.error('Falha ao limpar anexos:', err);
-  }
-};
-
+  const delNote = (id: string) =>
+    setNotes(prev => { const n = prev.find(x => x.id === id); if (n) revokeUrls(n.attachments); return prev.filter(x => x.id !== id); });
 
   const prettyDate = (iso: string) => {
     try { return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(iso)); }
@@ -291,9 +137,9 @@ const delNote = async (id: string) => {
 
   return (
     <div className="min-h-screen font-body">
-      {/* Top bar (branca para contraste) */}
+      {/* Top bar */}
       <header className="sticky top-0 z-40 bg-white border-b border-neutral-200">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
+        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-4">
           <div className="flex items-center gap-2">
             <div className="size-8 rounded-full bg-black text-white grid place-items-center font-semibold font-title">N</div>
             <div className="leading-tight">
@@ -301,46 +147,41 @@ const delNote = async (id: string) => {
               <div className="text-xs text-slate-500">Estilo Reflect</div>
             </div>
           </div>
-      
-          {/* AQUI: aumentei o gap e arrumei o search/select */}
-          <div className="hidden md:flex items-center gap-4 ml-6 flex-1">
-            {/* Search com padding suficiente para a lupa */}
+
+          <div className="hidden md:flex items-center gap-3 ml-4 flex-1">
+            {/* Search com espaçamento correto */}
             <div className="relative flex-1">
               <Search className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 size-5 text-slate-400" />
               <input
                 value={q}
                 onChange={(e) => { setQ(e.target.value); setLimit(12); }}
                 placeholder="Buscar notas, autores e categorias"
-                className="w-full pr-4 py-3 input-clean rounded-full"
-                /* força o respiro da lupa, caso input-clean mexa no padding */
-                style={{ paddingLeft: '3.25rem' }}   // ~ pl-14
+                className="w-full pl-12 pr-4 h-11 input-clean rounded-full"
               />
             </div>
-      
-            {/* Select com ícone dentro e espaço próprio à direita */}
+
+            {/* Select categoria com espaço do Filter */}
             <div className="relative">
               <select
                 value={cat}
                 onChange={(e) => { setCat(e.target.value); setLimit(12); }}
-                className="select pr-10"               // dá espaço para o ícone
+                className="select h-11 pr-9"
                 aria-label="Selecionar categoria"
-                style={{ paddingRight: '2.5rem' }}     // garante o respiro mesmo se select redefinir padding
               >
                 <option>Todos</option>
                 {categories.map(c => <option key={c}>{c}</option>)}
               </select>
-              <Filter className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
+              <Filter className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
             </div>
-      
-            {/* Botão com um espacinho extra à esquerda */}
-            <button onClick={() => setOpen(true)} className="button ml-1">
+
+            <button onClick={() => setOpen(true)} className="button h-11 px-5">
               <span className="inline-flex items-center gap-2">
                 <Plus className="size-4" />
                 Nova nota
               </span>
             </button>
           </div>
-      
+
           <div className="md:hidden ml-auto">
             <button onClick={() => setOpen(true)} className="inline-flex items-center gap-2 btn-dark font-title rounded-full">
               <Plus className="size-4" />Nova
@@ -385,19 +226,15 @@ const delNote = async (id: string) => {
             onClick={() => setOpen(true)}
             role="button"
             tabIndex={0}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                setOpen(true);
-              }
-            }}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setOpen(true); } }}
             aria-label="Abrir criador de nota"
           >
             <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-transparent group-hover:ring-white/10 transition" />
             <div className="flex items-center gap-2 mb-3">
               <div className="size-7 rounded-full bg-black text-white grid place-items-center font-semibold font-title">N</div>
+
               <input
-                value=""
+                value={qcTitle}
                 placeholder="Escreva um título rápido…"
                 className="flex-1 input-clean py-3"
                 readOnly
@@ -406,8 +243,9 @@ const delNote = async (id: string) => {
                 aria-hidden="true"
                 style={{ pointerEvents: 'none' }}
               />
+
               <select
-                value="Geral"
+                value={qcCat}
                 className="input-clean py-3"
                 tabIndex={-1}
                 aria-hidden="true"
@@ -415,28 +253,19 @@ const delNote = async (id: string) => {
               >
                 {categories.map(c => <option key={c}>{c}</option>)}
               </select>
-              <label
-                className="inline-flex items-center gap-2 text-sm input-clean py-3 cursor-default"
-                tabIndex={-1}
-                aria-hidden="true"
-                style={{ pointerEvents: 'none' }}
-              >
+
+              <span className="inline-flex items-center gap-2 text-sm input-clean py-3 cursor-default select-none" aria-hidden="true" style={{ pointerEvents: 'none' }}>
                 <Paperclip className="size-4" />
                 Anexar
-              </label>
-              <button
-                type="button"
-                className="button"
-                tabIndex={-1}
-                aria-hidden="true"
-                style={{ pointerEvents: 'none' }}
-              >
+              </span>
+
+              <button type="button" className="button" tabIndex={-1} aria-hidden="true" style={{ pointerEvents: 'none' }}>
                 <span>Postar</span>
               </button>
             </div>
           </section>
 
-          {/* Feed — FIXO EM LISTA */}
+          {/* Feed — somente LISTA */}
           {visible.length === 0 ? (
             <Empty onNew={() => setOpen(true)} />
           ) : (
@@ -467,16 +296,12 @@ const delNote = async (id: string) => {
               <div className="mt-3 space-y-3">
                 <div>
                   <label className="text-xs text-slate-400">Ordenar</label>
-                  <select
-                    value={sort}
-                    onChange={(e) => { setSort(e.target.value as 'new' | 'old'); setLimit(12); }}
-                    className="mt-1 w-full input-clean"
-                  >
+                  <select value={sort} onChange={(e) => { setSort(e.target.value as 'new' | 'old'); setLimit(12); }} className="mt-1 w-full input-clean">
                     <option value="new">Mais recentes</option>
                     <option value="old">Mais antigas</option>
                   </select>
                 </div>
-        
+
                 {/* Checkbox estilizado (Uiverse) */}
                 <div className="checkbox-wrapper-4 mt-1">
                   <input
@@ -502,7 +327,7 @@ const delNote = async (id: string) => {
                 </div>
               </div>
             </div>
-        
+
             <div className="glass p-4">
               <h3 className="font-semibold text-sm font-title">Dicas</h3>
               <ul className="mt-2 text-sm text-slate-400 list-disc list-inside space-y-1">
@@ -601,8 +426,6 @@ const delNote = async (id: string) => {
   );
 }
 
-import { supabase } from '@/lib/supabaseClient' // ajuste o caminho
-
 // ===================== Components =====================
 
 // ======== NoteDetails (modal de leitura) ========
@@ -626,31 +449,31 @@ function NoteDetails({
   return (
     <div className="w-full max-w-3xl">
       {/* Cabeçalho */}
-      <div className="flex items-start justify-between p-4 md:p-6 border-b border-[var(--border)]">
+      <div className="flex items-start justify-between p-4 md:p-6 border-b border-[var(--border)] bg-white text-black rounded-t-2xl">
         <div className="min-w-0">
           {mediaLabel && (
             <span className="inline-flex items-center text-xs tag px-2 py-1 mb-2">{mediaLabel}</span>
           )}
-          <h2 className="text-xl md:text-2xl font-bold font-title text-white leading-snug break-words">
+          <h2 className="text-xl md:text-2xl font-bold font-title leading-snug break-words">
             {note.title || '(Sem título)'}
           </h2>
           {note.content && (
-            <p className="mt-2 text-slate-300 leading-relaxed">
+            <p className="mt-2 text-slate-700 leading-relaxed">
               {note.content.length > 260 ? note.content.slice(0, 260) + '…' : note.content}
             </p>
           )}
-          <div className="mt-3 flex items-center gap-3 text-slate-400 text-sm">
+          <div className="mt-3 flex items-center gap-3 text-slate-700 text-sm">
             <Avatar name={note.author || 'Anônimo'} />
             <div className="leading-tight">
-              <div className="text-slate-200">{note.author || 'Anônimo'}</div>
-              <div className="text-slate-400">{prettyDate(note.createdAt)}</div>
+              <div className="text-slate-900">{note.author || 'Anônimo'}</div>
+              <div className="text-slate-600">{prettyDate(note.createdAt)}</div>
             </div>
             <span className="mx-1">•</span>
             <span className="inline-flex items-center gap-1 tag px-2 py-1">{note.category}</span>
           </div>
         </div>
 
-        <button onClick={onClose} className="text-slate-400 hover:text-white ml-4 shrink-0" aria-label="Fechar">
+        <button onClick={onClose} className="text-slate-600 hover:text-black ml-4 shrink-0" aria-label="Fechar">
           <X className="size-5" />
         </button>
       </div>
@@ -679,13 +502,26 @@ function NoteDetails({
           <section>
             <h3 className="font-semibold text-white mb-2">Anexos</h3>
             <div className="grid gap-2">
-            {note.attachments.map((a) => (
-              <Row
-                key={a.id}
-                a={a}
-                onRemove={() => removeAttachment(note.id, a.id)}
-              />
-            ))}
+              {note.attachments.map((a) => (
+                <div key={a.id} className="flex items-center gap-3 p-2 rounded-xl bg-[var(--elev)] border border-[var(--border)]">
+                  <Icon kind={a.kind} className="size-5" />
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm text-slate-100" title={a.name}>{a.name}</div>
+                    {typeof a.size === 'number' && (
+                      <div className="text-xs text-slate-500">{fmtBytes(a.size)}</div>
+                    )}
+                  </div>
+                  {a.kind === 'image' ? (
+                    <a href={a.url} target="_blank" rel="noreferrer" className="text-slate-200 hover:text-white text-sm">Abrir</a>
+                  ) : a.kind === 'video' ? (
+                    <a href={a.url} target="_blank" rel="noreferrer" className="text-slate-200 hover:text-white text-sm">Reproduzir</a>
+                  ) : a.kind === 'pdf' ? (
+                    <a href={a.url} target="_blank" rel="noreferrer" className="text-slate-200 hover:text-white text-sm">Visualizar</a>
+                  ) : (
+                    <a href={a.url} download={a.name} className="text-slate-200 hover:text-white" title="Baixar"><Download className="size-4" /></a>
+                  )}
+                </div>
+              ))}
             </div>
           </section>
         )}
@@ -756,23 +592,17 @@ function Card({
           </button>
         </div>
 
-      {n.attachments?.length > 0 && (
-        <div className="mt-3 grid grid-cols-1 gap-2">
-          {n.attachments.map(a => (
-            <Row
-              key={a.id}
-              a={a}
-              onRemove={() => removeAttachment(n.id, a.id)}
-            />
-          ))}
-        </div>
-      )}
+        {n.attachments?.length > 0 && (
+          <div className="mt-3 grid grid-cols-1 gap-2">
+            {n.attachments.map(a => <Row key={a.id} a={a} />)}
+          </div>
+        )}
       </div>
     </article>
   );
 }
 
-function Row({ a, onRemove }: { a: Att; onRemove?: () => void }) {
+function Row({ a }: { a: Att }) {
   return (
     <div className="flex items-center gap-3 p-2 rounded-xl border border-[var(--border)] bg-[var(--elev)]">
       <Icon kind={a.kind} className="size-5" />
@@ -780,7 +610,6 @@ function Row({ a, onRemove }: { a: Att; onRemove?: () => void }) {
         <div className="truncate text-sm" title={a.name}>{a.name}</div>
         {typeof a.size === 'number' && <div className="text-xs text-slate-500">{fmtBytes(a.size)}</div>}
       </div>
-
       {a.kind === 'image' ? (
         <a href={a.url} target="_blank" rel="noreferrer" className="text-slate-200 text-sm">Abrir</a>
       ) : a.kind === 'video' ? (
@@ -789,17 +618,6 @@ function Row({ a, onRemove }: { a: Att; onRemove?: () => void }) {
         <a href={a.url} target="_blank" rel="noreferrer" className="text-slate-200 text-sm">Visualizar</a>
       ) : (
         <a href={a.url} download={a.name} className="text-slate-200 text-sm">Baixar</a>
-      )}
-
-      {onRemove && (
-        <button
-          onClick={(e) => { e.stopPropagation(); onRemove(); }}
-          className="ml-1 text-slate-400 hover:text-rose-400"
-          title="Remover anexo"
-          aria-label="Remover anexo"
-        >
-          <Trash2 className="size-4" />
-        </button>
       )}
     </div>
   );
@@ -836,18 +654,12 @@ function Modal({ children, onClose }: { children: React.ReactNode; onClose: () =
   return (
     <div className="fixed inset-0 z-50 grid place-items-center p-4">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative w-full max-w-2xl glass shadow-xl rounded-lg overflow-hidden">
-        {/* Header do modal */}
-        <div className="flex items-center justify-between p-4 bg-white text-black rounded-t-lg border-b border-[var(--border)]">
+      <div className="relative w-full max-w-2xl glass shadow-xl rounded-2xl overflow-hidden">
+        {/* Cabeçalho branco com texto preto */}
+        <div className="flex items-center justify-between p-4 border-b border-[var(--border)] bg-white text-black">
           <h3 className="font-semibold font-title">Nova nota</h3>
-          <button 
-            onClick={onClose} 
-            className="text-black hover:text-neutral-600 transition-colors"
-          >
-            <X className="size-5" />
-          </button>
+          <button onClick={onClose} className="text-slate-700 hover:text-black"><X className="size-5" /></button>
         </div>
-
         {children}
       </div>
     </div>
